@@ -1,0 +1,44 @@
+=== BIENVENIDO AL SISTEMA DE VENTAS ===
+
+--- LISTA DE PRODUCTOS ---
+ID: 1  | Producto 1      | Precio: $  10,00 | Stock: 50
+ID: 2  | Producto 2      | Precio: $  20,00 | Stock: 50
+ID: 3  | Producto 3      | Precio: $  30,00 | Stock: 50
+ID: 4  | Producto 4      | Precio: $  40,00 | Stock: 50
+ID: 5  | Producto 5      | Precio: $  50,00 | Stock: 50
+
+Ingrese el ID del producto (o '0' para finalizar y ver ticket): Ingrese la cantidad: 
+--- LISTA DE PRODUCTOS ---
+ID: 1  | Producto 1      | Precio: $  10,00 | Stock: 50
+ID: 2  | Producto 2      | Precio: $  20,00 | Stock: 49
+ID: 3  | Producto 3      | Precio: $  30,00 | Stock: 50
+ID: 4  | Producto 4      | Precio: $  40,00 | Stock: 50
+ID: 5  | Producto 5      | Precio: $  50,00 | Stock: 50
+
+Ingrese el ID del producto (o '0' para finalizar y ver ticket): Ingrese la cantidad: 
+--- LISTA DE PRODUCTOS ---
+ID: 1  | Producto 1      | Precio: $  10,00 | Stock: 50
+ID: 2  | Producto 2      | Precio: $  20,00 | Stock: 49
+ID: 3  | Producto 3      | Precio: $  30,00 | Stock: 50
+ID: 4  | Producto 4      | Precio: $  40,00 | Stock: 50
+ID: 5  | Producto 5      | Precio: $  50,00 | Stock: 48
+
+Ingrese el ID del producto (o '0' para finalizar y ver ticket): 
+Total de descuento por pago en efectivo es: $14,52
+�Desea aplicar el descuento por pago en efectivo? (s/n): 
+========================================
+           TICKET DE VENTA            
+========================================
+Cliente: Juan P�rez
+Email:   juan.perez@email.com
+----------------------------------------
+Producto             Cant. Subtotal
+----------------------------------------
+Producto 2               1 $   24,20
+Producto 5               2 $  121,00
+----------------------------------------
+CANTIDAD TOTAL ART�CULOS:             3
+DESCUENTO TOTAL APLICADO: $    0.00
+TOTAL A PAGAR:            $  145,20
+========================================
+
