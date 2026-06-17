@@ -7,6 +7,8 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.servlet.NoHandlerFoundException;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -17,6 +19,17 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(ProductNotFoundException.class) // Maneja la excepción personalizada de producto no encontrado
     public ResponseEntity<Map<String, Object>> handleProductNotFound(ProductNotFoundException ex) {
+        Map<String, Object> response = new HashMap<>();
+        response.put("timestamp", LocalDateTime.now());
+        response.put("status", HttpStatus.NOT_FOUND.value());
+        response.put("error", "Not Found");
+        response.put("message", ex.getMessage());
+        
+        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(CategoriaNotFoundException.class) // Maneja la excepción personalizada de categoría no encontrada
+    public ResponseEntity<Map<String, Object>> handleCategoriaNotFound(CategoriaNotFoundException ex) {
         Map<String, Object> response = new HashMap<>();
         response.put("timestamp", LocalDateTime.now());
         response.put("status", HttpStatus.NOT_FOUND.value());
@@ -76,13 +89,39 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class) // Maneja cuando un parámetro de ruta tiene un tipo incorrecto (ej: enviar texto en lugar de Long)
+    public ResponseEntity<Map<String, Object>> handleMethodArgumentTypeMismatch(MethodArgumentTypeMismatchException ex) {
+        Map<String, Object> response = new HashMap<>();
+        response.put("timestamp", LocalDateTime.now());
+        response.put("status", HttpStatus.BAD_REQUEST.value());
+        response.put("error", "Bad Request");
+        response.put("message", String.format("El parámetro '%s' debe ser de tipo %s, pero recibió: %s", 
+            ex.getName(), ex.getRequiredType().getSimpleName(), ex.getValue()));
+        
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(NoHandlerFoundException.class) // Maneja cuando no se encuentra la ruta solicitada
+    public ResponseEntity<Map<String, Object>> handleNoHandlerFound(NoHandlerFoundException ex) {
+        Map<String, Object> response = new HashMap<>();
+        response.put("timestamp", LocalDateTime.now());
+        response.put("status", HttpStatus.NOT_FOUND.value());
+        response.put("error", "Not Found");
+        response.put("message", "La ruta solicitada no existe: " + ex.getRequestURL());
+        
+        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+    }
+
     @ExceptionHandler(Exception.class) // Maneja cualquier otra excepción no controlada
     public ResponseEntity<Map<String, Object>> handleGenericException(Exception ex) {
         Map<String, Object> response = new HashMap<>();
         response.put("timestamp", LocalDateTime.now());
         response.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
         response.put("error", "Internal Server Error");
-        response.put("message", "Ha ocurrido un error inesperado");
+        response.put("message", "Ha ocurrido un error inesperado: " + ex.getMessage());
+        
+        // En desarrollo, podemos incluir el tipo de excepción para debugging
+        response.put("exception", ex.getClass().getSimpleName());
         
         return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
     }

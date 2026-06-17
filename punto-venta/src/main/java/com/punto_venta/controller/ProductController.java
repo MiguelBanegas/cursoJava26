@@ -2,19 +2,17 @@ package com.punto_venta.controller;
 
 import com.punto_venta.exception.ProductNotFoundException;
 import com.punto_venta.model.Product;
+import com.punto_venta.model.ApiResponse;
 import com.punto_venta.service.ProductService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import jakarta.validation.Valid;
 
-import java.time.LocalDateTime;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @RestController // Indica que esta clase es un controlador REST y que los métodos devolverán respuestas JSON
-@RequestMapping("/api/products") // Define la ruta base para todos los endpoints de este controlador, en este caso "/api/products"
+@RequestMapping("/products") // Define la ruta base para todos los endpoints de este controlador, en este caso "/api/products"
 public class ProductController {
 
     private final ProductService productService; // Inyección de dependencia del servicio que maneja la lógica de negocio relacionada con los productos
@@ -48,12 +46,9 @@ public class ProductController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Map<String, Object>> deleteProduct(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse> deleteProduct(@PathVariable Long id) {
         productService.deleteProduct(id);
-        Map<String, Object> response = new HashMap<>();
-        response.put("timestamp", LocalDateTime.now());
-        response.put("status", HttpStatus.OK.value());
-        response.put("message", "Producto con ID " + id + " eliminado exitosamente");
-        return ResponseEntity.ok(response); // Devuelve una respuesta con un mensaje de éxito y la hora de eliminación
+        ApiResponse response = new ApiResponse("Producto con ID " + id + " eliminado exitosamente", HttpStatus.OK.value());
+        return ResponseEntity.ok(response);
     }
 }
