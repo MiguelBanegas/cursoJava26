@@ -21,7 +21,7 @@ public class ProductController {
         this.productService = productService;
     }
 
-    @GetMapping // Maneja solicitudes GET a "/api/products" para obtener la lista de todos los productos
+    @GetMapping // Maneja solicitudes GET a "/products" para obtener la lista de todos los productos
     public List<Product> getAllProducts() {
         return productService.getAllProducts();
     }

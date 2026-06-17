@@ -7,7 +7,7 @@ import org.springframework.http.ResponseEntity;
 import com.punto_venta.model.Categoria;
 import com.punto_venta.model.ApiResponse;
 import com.punto_venta.service.CategoriaService;
-
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -32,13 +32,13 @@ public class CategoriaController {
     }
     
     @PostMapping
-    public ResponseEntity<Categoria> createCategoria(@RequestBody Categoria categoria) {
+    public ResponseEntity<Categoria> createCategoria(@RequestBody @Valid Categoria categoria) {
         Categoria savedCategoria = categoriaService.saveCategoria(categoria);
         return ResponseEntity.status(HttpStatus.CREATED).body(savedCategoria);
     }
     
     @PutMapping("/{id}")
-    public ResponseEntity<Categoria> updateCategoria(@PathVariable Long id, @RequestBody Categoria categoriaDetails) {
+    public ResponseEntity<Categoria> updateCategoria(@PathVariable Long id, @RequestBody @Valid Categoria categoriaDetails) {
         Categoria updatedCategoria = categoriaService.updateCategoria(id, categoriaDetails);
         return ResponseEntity.ok(updatedCategoria);
     }

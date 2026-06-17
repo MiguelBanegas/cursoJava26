@@ -12,12 +12,32 @@ public class Categoria {
     @Column(nullable = false, unique = true, length = 100)
     private String nombre;
 
+    @Column(nullable = true, unique = true, length = 100)
+    private String descripcion;
+
+
     public Categoria() {
     }
 
-    public Categoria(Long id, String nombre) {
+    // Constructor con el ID
+    public Categoria(Long id, String nombre, String descripcion) {
         this.id = id;
         this.nombre = nombre;
+        this.descripcion = descripcion;
+    }
+
+    // Constructor sin el ID
+    public Categoria(String nombre, String descripcion) {
+        this.nombre = nombre;
+        this.descripcion = descripcion;
+    }
+
+    public String getDescripcion() {
+        return descripcion;
+    }
+
+    public void setDescripcion(String descripcion) {
+        this.descripcion = descripcion;
     }
 
     public Long getId() {
@@ -40,6 +60,7 @@ public class Categoria {
         return "Categoria{" +
                 "id=" + id +
                 ", nombre='" + nombre + '\'' +
+                ", descripcion='" + descripcion + '\'' +
                 '}';
     }
     
