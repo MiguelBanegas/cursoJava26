@@ -1,11 +1,12 @@
 package com.punto_venta.controller;
 
-import com.punto_venta.exception.ProductNotFoundException;
+//import com.punto_venta.exception.ProductNotFoundException;
 import com.punto_venta.model.Product;
 import com.punto_venta.model.ApiResponse;
 import com.punto_venta.service.ProductService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.lang.NonNull;
 import org.springframework.web.bind.annotation.*;
 import jakarta.validation.Valid;
 
@@ -28,8 +29,7 @@ public class ProductController {
 
     @GetMapping("/{id}")
     public ResponseEntity<Product> getProductById(@PathVariable Long id) {
-        Product product = productService.getProductById(id)
-                .orElseThrow(() -> new ProductNotFoundException("Producto con ID " + id + " no encontrado")); // Si el producto no se encuentra, lanza una excepción personalizada que será manejada por GlobalExceptionHandler
+        Product product = productService.getProductById(id);
         return ResponseEntity.ok(product);
     }
 
@@ -40,7 +40,7 @@ public class ProductController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Product> updateProduct(@PathVariable Long id, @RequestBody Product product) { // Maneja solicitudes PUT a "/api/products/{id}" para actualizar un producto existente
+    public ResponseEntity<Product> updateProduct(@PathVariable @NonNull Long id, @RequestBody Product product) { // Maneja solicitudes PUT a "/api/products/{id}" para actualizar un producto existente
         Product updatedProduct = productService.updateProduct(id, product);
         return ResponseEntity.ok(updatedProduct); // Devuelve el producto actualizado con un estado 200 OK
     }

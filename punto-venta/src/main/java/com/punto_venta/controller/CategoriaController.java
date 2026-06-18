@@ -4,6 +4,8 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.lang.NonNull;
+
 import com.punto_venta.model.Categoria;
 import com.punto_venta.model.ApiResponse;
 import com.punto_venta.service.CategoriaService;
@@ -38,7 +40,7 @@ public class CategoriaController {
     }
     
     @PutMapping("/{id}")
-    public ResponseEntity<Categoria> updateCategoria(@PathVariable Long id, @RequestBody @Valid Categoria categoriaDetails) {
+    public ResponseEntity<Categoria> updateCategoria(@PathVariable @NonNull Long id, @RequestBody @Valid Categoria categoriaDetails) {
         Categoria updatedCategoria = categoriaService.updateCategoria(id, categoriaDetails);
         return ResponseEntity.ok(updatedCategoria);
     }
