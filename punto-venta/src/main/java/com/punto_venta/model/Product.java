@@ -4,6 +4,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Positive;
@@ -23,12 +25,18 @@ public class Product {
     @Positive(message = "El precio debe ser un valor positivo mayor a cero")
     private Double price;
 
+    @ManyToOne
+    @JoinColumn(name = "categoria_id", nullable = false)
+    @NotNull(message = "La categoría es obligatoria")
+    private Categoria categoria;
+
     public Product() { // Constructor vacío necesario para JPA y para la deserialización de JSON en las solicitudes HTTP
     }
 
-    public Product(String name, Double price) {
+    public Product(String name, Double price, Categoria categoria) {
         this.name = name;
         this.price = price;
+        this.categoria = categoria;
     }
 
     public Long getId() {
@@ -53,5 +61,13 @@ public class Product {
 
     public void setPrice(Double price) {
         this.price = price;
+    }
+
+    public Categoria getCategoria() {
+        return categoria;
+    }
+
+    public void setCategoria(Categoria categoria) {
+        this.categoria = categoria;
     }
 }

@@ -14,16 +14,19 @@ import java.util.List;
 public class ProductService {
     
     private final ProductRepository productRepository; // Inyección de dependencia del repositorio que maneja la persistencia de los productos en la base de datos
+    private final CategoriaService categoriaService;
 
-    public ProductService(ProductRepository productRepository) {
+    public ProductService(ProductRepository productRepository, CategoriaService categoriaService) {
         this.productRepository = productRepository;
+        this.categoriaService = categoriaService;
     }
 
     public List<Product> getAllProducts() { // Método que devuelve una lista de todos los productos almacenados en la base de datos utilizando el método findAll() del repositorio
         return productRepository.findAll();
     }
 
-    public Product getProductById(Long id) { 
+    public Product getProductById(Long id) { // Método que devuelve un producto específico por su ID. 
+                                            // Si el producto no existe, lanza una excepción ProductNotFoundException.
         if (id == null) {
             throw new IllegalArgumentException("El ID del producto no puede ser nulo");
         }
@@ -35,6 +38,14 @@ public class ProductService {
         if (product == null) {
             throw new IllegalArgumentException("El producto no puede ser nulo");
         }
+
+        if (product.getCategoria() == null || product.getCategoria().getId() == null) {
+            throw new IllegalArgumentException("El producto debe tener una categoría válida con un ID");
+        }
+
+        // Validamos que la categoría exista antes de guardar el producto
+        product.setCategoria(categoriaService.getCategoriaById(product.getCategoria().getId()));
+
         return productRepository.save(product);
     }
 
@@ -56,6 +67,11 @@ public class ProductService {
                     throw new IllegalArgumentException("El precio debe ser un valor positivo mayor a cero");
                 }
                 existingProduct.setPrice(updatedProduct.getPrice());
+            }
+            
+            // Solo actualizamos la categoría si se envió y tiene un ID válido
+            if (updatedProduct.getCategoria() != null && updatedProduct.getCategoria().getId() != null) {
+                existingProduct.setCategoria(categoriaService.getCategoriaById(updatedProduct.getCategoria().getId()));
             }
             
             return productRepository.save(existingProduct);

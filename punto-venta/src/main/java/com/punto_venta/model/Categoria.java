@@ -1,6 +1,9 @@
 package com.punto_venta.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "categorias")
@@ -15,6 +18,9 @@ public class Categoria {
     @Column(nullable = true, unique = true, length = 100)
     private String descripcion;
 
+    @OneToMany(mappedBy = "categoria", fetch = FetchType.LAZY)
+    @JsonIgnore // Evita recursión infinita en la serialización JSON
+    private List<Product> productos = new ArrayList<>();
 
     public Categoria() {
     }
@@ -54,6 +60,14 @@ public class Categoria {
 
     public void setNombre(String nombre) {
         this.nombre = nombre;
+    }
+
+    public List<Product> getProductos() {
+        return productos;
+    }
+
+    public void setProductos(List<Product> productos) {
+        this.productos = productos;
     }
 @Override
     public String toString() {
