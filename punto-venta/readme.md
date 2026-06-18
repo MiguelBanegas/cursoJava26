@@ -14,6 +14,8 @@ Esta es una API RESTful para gestionar productos en un sistema de punto de venta
   - Verificación automática de categorías: Si la base de datos de categorías está vacía al iniciar la aplicación, se crea una categoría `GENERAL` por defecto con ID `1`.
 - **Validación de Datos**:
   - Validación robusta en los campos de los productos (nombre, precio, categoría) utilizando `jakarta.validation`.
+- **Soporte para CORS**:
+  - Configuración habilitada para permitir peticiones desde diferentes orígenes, facilitando la integración con aplicaciones frontend modernas (React, Vue, Angular) que corran en puertos distintos.
 - **Manejo Global de Excepciones**:
   - Respuestas de error estandarizadas para `ProductNotFoundException`, `CategoriaNotFoundException`, `IllegalArgumentException`, errores de validación (`MethodArgumentNotValidException`), JSON malformado (`HttpMessageNotReadableException`) y otros errores inesperados.
 - **Tecnologías**:
@@ -187,20 +189,9 @@ La URL base para todos los endpoints es `http://localhost:8080`.
 ## 🛠️ Cómo Iniciar la Aplicación
 
 1.  **Clonar el repositorio:** (Si aplica)
-2.  **Configuración de la Base de Datos:** 
-    Asegúrate de que `src/main/resources/application.properties` esté configurado correctamente para tu instancia de MySQL. 
-    
-    Para que Hibernate cree las tablas automáticamente, asegúrate de incluir:
-    ```properties
-    spring.datasource.url=jdbc:mysql://localhost:3306/nombre_tu_bd
-    spring.datasource.username=tu_usuario
-    spring.datasource.password=tu_contraseña
-    spring.jpa.hibernate.ddl-auto=update
-    spring.jpa.show-sql=true
-    ```
-
+2.  **Configuración de la Base de Datos:** Asegúrate de que `application.properties` esté configurado correctamente para la base de datos MySql.
 3.  **Compilar y Ejecutar:**
    ```bash
    ./mvnw spring-boot:run
    ```
-4.  La API estará disponible en `http://localhost:8080`.
+4.  La API estará disponible en `http://localhost:8080`. Se puede probar levantando el archivo index.html (resourses>static>index.html) en el navegador, donde se puede hacer una prueba simple en frontend.
