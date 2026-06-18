@@ -13,7 +13,7 @@ import jakarta.validation.Valid;
 import java.util.List;
 
 @RestController // Indica que esta clase es un controlador REST y que los métodos devolverán respuestas JSON
-@RequestMapping("/products") // Define la ruta base para todos los endpoints de este controlador, en este caso "/api/products"
+@RequestMapping("/products") // Define la ruta base para todos los endpoints de este controlador
 public class ProductController {
 
     private final ProductService productService; // Inyección de dependencia del servicio que maneja la lógica de negocio relacionada con los productos
@@ -40,7 +40,7 @@ public class ProductController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Product> updateProduct(@PathVariable @NonNull Long id, @RequestBody Product product) { // Maneja solicitudes PUT a "/api/products/{id}" para actualizar un producto existente
+    public ResponseEntity<Product> updateProduct(@PathVariable @NonNull Long id, @RequestBody Product product) { // Maneja solicitudes PUT a "/products/{id}" para actualizar un producto existente
         Product updatedProduct = productService.updateProduct(id, product);
         return ResponseEntity.ok(updatedProduct); // Devuelve el producto actualizado con un estado 200 OK
     }
