@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Punto de Venta - Frontend</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .card h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #333;
+            font-weight: 600;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 5px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 5px rgba(102, 126, 234, 0.3);
+        }
+
+        button {
+            background: #667eea;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 600;
+            transition: background 0.3s;
+            width: 100%;
+        }
+
+        button:hover {
+            background: #764ba2;
+        }
+
+        button.secondary {
+            background: #ff6b6b;
+            margin-top: 5px;
+            padding: 8px 15px;
+            font-size: 0.9em;
+        }
+
+        button.secondary:hover {
+            background: #ff5252;
+        }
+
+        .results {
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .results h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+        thead {
+            background: #f5f5f5;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        th {
+            background: #667eea;
+            color: white;
+            font-weight: 600;
+        }
+
+        tr:hover {
+            background: #f9f9f9;
+        }
+
+        .message {
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            display: none;
+        }
+
+        .message.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+            display: block;
+        }
+
+        .message.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+            display: block;
+        }
+
+        .empty-state {
+            text-align: center;
+            color: #999;
+            padding: 40px 20px;
+        }
+
+        .empty-state p {
+            font-size: 1.1em;
+        }
+
+        @media (max-width: 768px) {
+            .content {
+                grid-template-columns: 1fr;
+            }
+
+            h1 {
+                font-size: 1.8em;
+            }
+
+            table {
+                font-size: 0.9em;
+            }
+
+            th, td {
+                padding: 8px;
+            }
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 5px;
+        }
+
+        .action-buttons button {
+            flex: 1;
+            padding: 8px;
+            font-size: 0.85em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🛒 Punto de Venta</h1>
+            <p>Sistema de gestión de categorías y productos</p>
+        </header>
+
+        <div class="content">
+            <!-- Sección de Categorías -->
+            <div class="card">
+                <h2>📂 Categorías</h2>
+                <div id="categoryMessage" class="message"></div>
+                
+                <div class="form-group">
+                    <label for="categoryName">Nombre de Categoría</label>
+                    <input type="text" id="categoryName" placeholder="Ej: Electrónica">
+                </div>
+
+                <div class="form-group">
+                    <label for="categoryDescription">Descripción</label>
+                    <input type="text" id="categoryDescription" placeholder="Ej: Productos electrónicos diversos">
+                </div>
+
+                <button onclick="createCategory()">➕ Agregar Categoría</button>
+                <button onclick="loadCategories()" style="margin-top: 10px;">🔄 Cargar Categorías</button>
+                
+                <h3 style="color: #667eea; margin-top: 30px; margin-bottom: 15px;">Actualizar Categoría</h3>
+                <div class="form-group">
+                    <label for="updateCategoryId">ID de Categoría a Actualizar</label>
+                    <input type="number" id="updateCategoryId" placeholder="ID de Categoría">
+                </div>
+                <div class="form-group">
+                    <label for="updateCategoryName">Nuevo Nombre</label>
+                    <input type="text" id="updateCategoryName" placeholder="Nuevo nombre de categoría">
+                </div>
+                <div class="form-group">
+                    <label for="updateCategoryDescription">Nueva Descripción</label>
+                    <input type="text" id="updateCategoryDescription" placeholder="Nueva descripción">
+                </div>
+                <button onclick="updateCategory()">✏️ Actualizar Categoría</button>
+            </div>
+
+            <!-- Sección de Productos -->
+            <div class="card">
+                <h2>📦 Productos</h2>
+                <div id="productMessage" class="message"></div>
+
+                <div class="form-group">
+                    <label for="productName">Nombre del Producto</label>
+                    <input type="text" id="productName" placeholder="Ej: Laptop">
+                </div>
+
+                <div class="form-group">
+                    <label for="productPrice">Precio</label>
+                    <input type="number" id="productPrice" placeholder="Ej: 999.99" step="0.01">
+                </div>
+
+                <div class="form-group">
+                    <label for="productCategory">Categoría</label>
+                    <select id="productCategory">
+                        <option value="">Cargando categorías...</option>
+                    </select>
+                </div>
+
+                <button onclick="createProduct()">➕ Agregar Producto</button>
+                <button onclick="loadProducts()" style="margin-top: 10px;">🔄 Cargar Productos</button>
+
+                <h3 style="color: #667eea; margin-top: 30px; margin-bottom: 15px;">Actualizar Producto</h3>
+                <div class="form-group">
+                    <label for="updateProductId">ID de Producto a Actualizar</label>
+                    <input type="number" id="updateProductId" placeholder="ID de Producto">
+                </div>
+                <div class="form-group">
+                    <label for="updateProductName">Nuevo Nombre</label>
+                    <input type="text" id="updateProductName" placeholder="Nuevo nombre de producto">
+                </div>
+                <div class="form-group">
+                    <label for="updateProductPrice">Nuevo Precio</label>
+                    <input type="number" id="updateProductPrice" placeholder="Nuevo precio" step="0.01">
+                </div>
+                <div class="form-group">
+                    <label for="updateProductCategory">Nueva Categoría</label>
+                    <select id="updateProductCategory">
+                        <option value="">Cargando categorías...</option>
+                    </select>
+                </div>
+                <button onclick="updateProduct()">✏️ Actualizar Producto</button>
+            </div>
+        </div>
+
+        <!-- Resultados -->
+        <div class="results">
+            <h2>📊 Resultados</h2>
+            
+            <div style="margin-bottom: 30px;">
+                <h3 style="color: #667eea; margin-bottom: 15px;">Categorías Registradas</h3>
+                <div id="categoriesTable"></div>
+            </div>
+
+            <div>
+                <h3 style="color: #667eea; margin-bottom: 15px;">Productos Registrados</h3>
+                <div id="productsTable"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:8080';
+
+        // Cargar categorías al iniciar
+        window.addEventListener('DOMContentLoaded', () => {
+            loadCategories();
+            loadProducts();
+            loadCategoriesForSelect();
+            loadCategoriesForUpdateSelect();
+        });
+
+        // CATEGORÍAS
+        async function loadCategories() {
+            try {
+                const response = await fetch(`${API_URL}/categorias`);
+                if (!response.ok) throw new Error(`Error: ${response.status}`);
+                const categorias = await response.json();
+                displayCategories(categorias);
+            } catch (error) {
+                console.error('Error cargando categorías:', error);
+                document.getElementById('categoriesTable').innerHTML = 
+                    '<div class="empty-state"><p>❌ Error al cargar categorías</p></div>';
+            }
+        }
+
+        async function loadCategoriesForSelect() {
+            try {
+                const response = await fetch(`${API_URL}/categorias`);
+                if (!response.ok) throw new Error(`Error: ${response.status}`);
+                const categorias = await response.json();
+                const select = document.getElementById('productCategory');
+                select.innerHTML = '<option value="">Selecciona una categoría</option>';
+                categorias.forEach(cat => {
+                    const option = document.createElement('option');
+                    option.value = cat.id;
+                    option.textContent = cat.nombre;
+                    select.appendChild(option);
+                });
+            } catch (error) {
+                console.error('Error cargando categorías:', error);
+            }
+        }
+
+        async function createCategory() {
+            const nombre = document.getElementById('categoryName').value.trim();
+            const descripcion = document.getElementById('categoryDescription').value.trim();
+
+            if (!nombre) {
+                showMessage('categoryMessage', 'Por favor ingresa un nombre de categoría', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/categorias`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ nombre, descripcion })
+                });
+
+                if (!response.ok) throw new Error(`Error: ${response.status}`);
+                
+                showMessage('categoryMessage', '✅ Categoría creada exitosamente', 'success');
+                document.getElementById('categoryName').value = '';
+                document.getElementById('categoryDescription').value = '';
+                
+                loadCategories();
+                loadCategoriesForSelect();
+                loadCategoriesForUpdateSelect();
+            } catch (error) {
+                console.error('Error creando categoría:', error);
+                showMessage('categoryMessage', '❌ Error al crear la categoría', 'error');
+            }
+        }
+
+        async function deleteCategory(id) {
+            if (!confirm('¿Estás seguro de que deseas eliminar esta categoría?')) return;
+
+            try {
+                const response = await fetch(`${API_URL}/categorias/${id}`, {
+                    method: 'DELETE'
+                });
+
+                if (!response.ok) throw new Error(`Error: ${response.status}`);
+                
+                showMessage('categoryMessage', '✅ Categoría eliminada exitosamente', 'success');
+                loadCategories();
+                loadCategoriesForSelect();
+                loadCategoriesForUpdateSelect();
+            } catch (error) {
+                console.error('Error eliminando categoría:', error);
+                showMessage('categoryMessage', '❌ Error al eliminar la categoría', 'error');
+            }
+        }
+
+        async function updateCategory() {
+            const id = document.getElementById('updateCategoryId').value.trim();
+            const nombre = document.getElementById('updateCategoryName').value.trim();
+            const descripcion = document.getElementById('updateCategoryDescription').value.trim();
+
+            if (!id || !nombre) {
+                showMessage('categoryMessage', 'Por favor ingresa ID y nombre para actualizar', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/categorias/${id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ nombre, descripcion })
+                });
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`Error: ${response.status} - ${errorText}`);
+                }
+                
+                showMessage('categoryMessage', '✅ Categoría actualizada exitosamente', 'success');
+                document.getElementById('updateCategoryId').value = '';
+                document.getElementById('updateCategoryName').value = '';
+                document.getElementById('updateCategoryDescription').value = '';
+
+                loadCategories();
+                loadCategoriesForSelect();
+                loadCategoriesForUpdateSelect();
+            } catch (error) {
+                console.error('Error actualizando categoría:', error);
+                showMessage('categoryMessage', `❌ Error al actualizar categoría: ${error.message}`, 'error');
+            }
+        }
+
+        function displayCategories(categorias) {
+            const container = document.getElementById('categoriesTable');
+            
+            if (categorias.length === 0) {
+                container.innerHTML = '<div class="empty-state"><p>No hay categorías registradas</p></div>';
+                return;
+            }
+
+            let html = '<table><thead><tr><th>ID</th><th>Nombre</th><th>Descripción</th><th>Acciones</th></tr></thead><tbody>';
+            categorias.forEach(cat => {
+                html += `
+                    <tr>
+                        <td>${cat.id}</td>
+                        <td>${cat.nombre}</td>
+                        <td>${cat.descripcion || '-'}</td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="secondary" onclick="editCategory(${cat.id})">✏️ Editar</button>
+                                <button class="secondary" onclick="deleteCategory(${cat.id})">🗑️ Eliminar</button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            });
+            html += '</tbody></table>';
+            container.innerHTML = html;
+        }
+
+        async function editCategory(id) {
+            try {
+                const response = await fetch(`${API_URL}/categorias/${id}`);
+                if (!response.ok) throw new Error(`Error: ${response.status}`);
+                const categoria = await response.json();
+
+                document.getElementById('updateCategoryId').value = categoria.id;
+                document.getElementById('updateCategoryName').value = categoria.nombre;
+                document.getElementById('updateCategoryDescription').value = categoria.descripcion;
+            } catch (error) {
+                console.error('Error cargando categoría para editar:', error);
+                showMessage('categoryMessage', '❌ Error al cargar categoría para editar', 'error');
+            }
+        }
+
+        async function loadCategoriesForUpdateSelect() {
+            try {
+                const response = await fetch(`${API_URL}/categorias`);
+                if (!response.ok) throw new Error(`Error: ${response.status}`);
+                const categorias = await response.json();
+                const select = document.getElementById('updateProductCategory');
+                select.innerHTML = '<option value="">Selecciona una categoría</option>';
+                categorias.forEach(cat => {
+                    const option = document.createElement('option');
+                    option.value = cat.id;
+                    option.textContent = cat.nombre;
+                    select.appendChild(option);
+                });
+            } catch (error) {
+                console.error('Error cargando categorías para el select de actualización:', error);
+            }
+        }
+
+        // PRODUCTOS
+        async function loadProducts() {
+            try {
+                const response = await fetch(`${API_URL}/products`);
+                if (!response.ok) throw new Error(`Error: ${response.status}`);
+                const products = await response.json();
+                displayProducts(products);
+            } catch (error) {
+                console.error('Error cargando productos:', error);
+                document.getElementById('productsTable').innerHTML = 
+                    '<div class="empty-state"><p>❌ Error al cargar productos</p></div>';
+            }
+        }
+
+        async function createProduct() {
+            const nombre = document.getElementById('productName').value.trim();
+            const precio = document.getElementById('productPrice').value;
+            const categoriaId = document.getElementById('productCategory').value;
+
+            if (!nombre || !precio || !categoriaId) {
+                showMessage('productMessage', 'Por favor completa todos los campos', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/products`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        name: nombre,
+                        price: parseFloat(precio),
+                        categoria: { id: parseInt(categoriaId) }
+                    })
+                });
+
+                if (!response.ok) throw new Error(`Error: ${response.status}`);
+                
+                showMessage('productMessage', '✅ Producto creado exitosamente', 'success');
+                document.getElementById('productName').value = '';
+                document.getElementById('productPrice').value = '';
+                document.getElementById('productCategory').value = '';
+                
+                loadProducts();
+            } catch (error) {
+                console.error('Error creando producto:', error);
+                showMessage('productMessage', '❌ Error al crear el producto', 'error');
+            }
+        }
+
+        async function deleteProduct(id) {
+            if (!confirm('¿Estás seguro de que deseas eliminar este producto?')) return;
+
+            try {
+                const response = await fetch(`${API_URL}/products/${id}`, {
+                    method: 'DELETE'
+                });
+
+                if (!response.ok) throw new Error(`Error: ${response.status}`);
+                
+                showMessage('productMessage', '✅ Producto eliminado exitosamente', 'success');
+                loadProducts();
+            } catch (error) {
+                console.error('Error eliminando producto:', error);
+                showMessage('productMessage', '❌ Error al eliminar el producto', 'error');
+            }
+        }
+
+        async function updateProduct() {
+            const id = document.getElementById('updateProductId').value.trim();
+            const name = document.getElementById('updateProductName').value.trim();
+            const price = document.getElementById('updateProductPrice').value;
+            const categoriaId = document.getElementById('updateProductCategory').value;
+
+            if (!id || !name || !price || !categoriaId) {
+                showMessage('productMessage', 'Por favor completa todos los campos para actualizar el producto', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/products/${id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        name,
+                        price: parseFloat(price),
+                        categoria: { id: parseInt(categoriaId) }
+                    })
+                });
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`Error: ${response.status} - ${errorText}`);
+                }
+                
+                showMessage('productMessage', '✅ Producto actualizado exitosamente', 'success');
+                document.getElementById('updateProductId').value = '';
+                document.getElementById('updateProductName').value = '';
+                document.getElementById('updateProductPrice').value = '';
+                document.getElementById('updateProductCategory').value = '';
+                
+                loadProducts();
+            } catch (error) {
+                console.error('Error actualizando producto:', error);
+                showMessage('productMessage', `❌ Error al actualizar producto: ${error.message}`, 'error');
+            }
+        }
+
+        function displayProducts(products) {
+            const container = document.getElementById('productsTable');
+            
+            if (products.length === 0) {
+                container.innerHTML = '<div class="empty-state"><p>No hay productos registrados</p></div>';
+                return;
+            }
+
+            let html = '<table><thead><tr><th>ID</th><th>Nombre</th><th>Precio</th><th>Categoría</th><th>ID Cat.</th><th>Acciones</th></tr></thead><tbody>';
+            products.forEach(prod => {
+                html += `
+                    <tr>
+                        <td>${prod.id}</td>
+                        <td>${prod.name}</td>
+                        <td>$${prod.price.toFixed(2)}</td>
+                        <td>${prod.categoria.nombre}</td>
+                        <td>${prod.categoria.id}</td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="secondary" onclick="editProduct(${prod.id})">✏️ Editar</button>
+                                <button class="secondary" onclick="deleteProduct(${prod.id})">🗑️ Eliminar</button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            });
+            html += '</tbody></table>';
+            container.innerHTML = html;
+        }
+
+        async function editProduct(id) {
+            try {
+                const response = await fetch(`${API_URL}/products/${id}`);
+                if (!response.ok) throw new Error(`Error: ${response.status}`);
+                const product = await response.json();
+
+                document.getElementById('updateProductId').value = product.id;
+                document.getElementById('updateProductName').value = product.name;
+                document.getElementById('updateProductPrice').value = product.price;
+                // Asegúrate de que la categoría se cargue en el select correctamente
+                // Esto podría necesitar un pequeño retraso o lógica adicional si el select no está completamente cargado
+                document.getElementById('updateProductCategory').value = product.categoria.id;
+            } catch (error) {
+                console.error('Error cargando producto para editar:', error);
+                showMessage('productMessage', '❌ Error al cargar producto para editar', 'error');
+            }
+        }
+
+        // Utilidades
+        function showMessage(elementId, message, type) {
+            const element = document.getElementById(elementId);
+            element.textContent = message;
+            element.className = `message ${type}`;
+            
+            setTimeout(() => {
+                element.className = 'message';
+            }, 4000);
+        }
+    </script>
+</body>
+</html>
