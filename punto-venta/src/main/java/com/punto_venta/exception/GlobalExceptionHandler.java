@@ -28,6 +28,12 @@ public class GlobalExceptionHandler { // Clase para manejar excepciones de forma
         return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
     }
 
+    @ExceptionHandler(InsufficientStockException.class) // Maneja la excepción de stock insuficiente
+    public ResponseEntity<ApiResponse> handleInsufficientStock(InsufficientStockException ex) {
+        ApiResponse response = new ApiResponse(ex.getMessage(), HttpStatus.BAD_REQUEST.value());
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
+
     @ExceptionHandler(IllegalArgumentException.class) // Maneja excepciones de argumentos ilegales, como datos nulos o inválidos
     public ResponseEntity<ApiResponse> handleIllegalArgument(IllegalArgumentException ex) {
         ApiResponse response = new ApiResponse(ex.getMessage(), HttpStatus.BAD_REQUEST.value());

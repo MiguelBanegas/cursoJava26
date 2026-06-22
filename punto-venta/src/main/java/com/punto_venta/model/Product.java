@@ -10,6 +10,8 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.Min;
+import jakarta.persistence.Column;
 
 @Entity // Indica que esta clase es una entidad JPA que se mapeará a una tabla en la base de datos
 public class Product {
@@ -29,6 +31,10 @@ public class Product {
     @JoinColumn(name = "categoria_id", nullable = false)
     @NotNull(message = "La categoría es obligatoria")
     private Categoria categoria;
+
+    @Column(columnDefinition = "integer default 0")
+    @Min(value = 0, message = "El stock no puede ser negativo")
+    private Integer stock = 0;
 
     public Product() { // Constructor vacío necesario para JPA y para la deserialización de JSON en las solicitudes HTTP
     }
@@ -69,5 +75,13 @@ public class Product {
 
     public void setCategoria(Categoria categoria) {
         this.categoria = categoria;
+    }
+
+    public Integer getStock() {
+        return stock;
+    }
+
+    public void setStock(Integer stock) {
+        this.stock = stock;
     }
 }

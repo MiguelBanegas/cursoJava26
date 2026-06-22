@@ -1,7 +1,9 @@
 package com.punto_venta.service;
 
 import com.punto_venta.exception.ProductNotFoundException;
+import com.punto_venta.exception.InsufficientStockException;
 import com.punto_venta.model.Product;
+import com.punto_venta.dto.StockUpdateDTO;
 import com.punto_venta.repository.ProductRepository;
 
 import org.springframework.lang.NonNull;
@@ -86,5 +88,30 @@ public class ProductService {
             throw new ProductNotFoundException("Producto con ID " + id + " no encontrado");
         }
         productRepository.deleteById(id);
+    }
+
+    public Product actualizarStock(Long id, StockUpdateDTO dto) {
+        Product product = getProductById(id);
+
+        if (product.getStock() == null) {
+            product.setStock(0);
+        }
+
+        switch (dto.getOperacion()) {
+            case AGREGAR:
+                product.setStock(product.getStock() + dto.getCantidad());
+                break;
+            case RESTAR:
+                if (product.getStock() < dto.getCantidad()) {
+                    throw new InsufficientStockException("Stock insuficiente para realizar la operación. Stock actual: " + product.getStock());
+                }
+                product.setStock(product.getStock() - dto.getCantidad());
+                break;
+            case AJUSTAR:
+                product.setStock(dto.getCantidad());
+                break;
+        }
+
+        return productRepository.save(product);
     }
 }

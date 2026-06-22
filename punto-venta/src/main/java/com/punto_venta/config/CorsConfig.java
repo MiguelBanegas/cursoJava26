@@ -9,6 +9,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 public class CorsConfig implements WebMvcConfigurer {
 
     @Override
+    // Configura las reglas de CORS para permitir solicitudes desde los orígenes especificados y con los métodos HTTP permitidos
     public void addCorsMappings(@NonNull CorsRegistry registry) {
         registry.addMapping("/**")
                 .allowedOrigins("http://localhost:8080", "http://localhost:3000", "http://127.0.0.1:5500")
