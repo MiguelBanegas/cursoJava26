@@ -28,6 +28,12 @@ public class GlobalExceptionHandler { // Clase para manejar excepciones de forma
         return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
     }
 
+    @ExceptionHandler(ClienteNotFoundException.class) // Maneja la excepción personalizada de cliente no encontrado
+    public ResponseEntity<ApiResponse> handleClienteNotFound(ClienteNotFoundException ex) {
+        ApiResponse response = new ApiResponse(ex.getMessage(), HttpStatus.NOT_FOUND.value());
+        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+    }
+
     @ExceptionHandler(InsufficientStockException.class) // Maneja la excepción de stock insuficiente
     public ResponseEntity<ApiResponse> handleInsufficientStock(InsufficientStockException ex) {
         ApiResponse response = new ApiResponse(ex.getMessage(), HttpStatus.BAD_REQUEST.value());
