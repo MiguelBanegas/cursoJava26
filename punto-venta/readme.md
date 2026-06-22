@@ -9,6 +9,7 @@ Esta es una API RESTful para gestionar productos en un sistema de punto de venta
   - Consulta de todos los productos o de un producto específico por su ID.
   - Actualización parcial de productos (nombre, precio, categoría).
   - Eliminación de productos.
+  - Control de stock con operaciones de Agregar, Restar y Ajustar.
 - **Gestión de Categorías**:
   - Cada producto está asociado a una categoría existente.
   - Verificación automática de categorías: Si la base de datos de categorías está vacía al iniciar la aplicación, se crea una categoría `GENERAL` por defecto con ID `1`.
@@ -183,6 +184,41 @@ La URL base para todos los endpoints es `http://localhost:8080`.
     "message": "Producto con ID 999 no encontrado",
     "timestamp": "2023-10-27T10:15:00.123456",
     "status": 404
+  }
+  ```
+
+### 6. Actualizar el stock de un producto
+
+- **Método:** `PATCH`
+- **URL:** `/products/{id}/stock`
+- **Descripción:** Permite actualizar el stock de un producto utilizando diferentes operaciones (`AGREGAR`, `RESTAR`, `AJUSTAR`). Valida que el stock resultante no sea negativo y lanza una excepción si se intenta restar más cantidad de la disponible.
+- **Cuerpo de la Solicitud (Request Body):**
+  ```json
+  {
+    "cantidad": 15,
+    "operacion": "AGREGAR"
+  }
+  ```
+- **Respuesta Exitosa (200 OK):**
+  ```json
+  {
+    "id": 1,
+    "name": "Manzanas",
+    "price": 1.5,
+    "stock": 15,
+    "categoria": {
+      "id": 1,
+      "name": "Frutas",
+      "description": "Frutas frescas"
+    }
+  }
+  ```
+- **Respuesta de Error (400 Bad Request - Stock Insuficiente):**
+  ```json
+  {
+    "message": "Stock insuficiente para realizar la operación. Stock actual: 10",
+    "timestamp": "2023-10-27T10:20:00.123456",
+    "status": 400
   }
   ```
 
