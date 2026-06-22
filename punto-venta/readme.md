@@ -1,6 +1,6 @@
 # API de Punto de Venta
 
-Esta es una API RESTful para gestionar productos en un sistema de punto de venta. Permite realizar operaciones CRUD (Crear, Leer, Actualizar, Eliminar) sobre productos, incluyendo la gestión de categorías asociadas.
+Esta es una API RESTful para gestionar productos y clientes en un sistema de punto de venta. Permite realizar operaciones CRUD (Crear, Leer, Actualizar, Eliminar) sobre productos (con sus categorías) y clientes.
 
 ## 🚀 Características
 
@@ -13,17 +13,21 @@ Esta es una API RESTful para gestionar productos en un sistema de punto de venta
 - **Gestión de Categorías**:
   - Cada producto está asociado a una categoría existente.
   - Verificación automática de categorías: Si la base de datos de categorías está vacía al iniciar la aplicación, se crea una categoría `GENERAL` por defecto con ID `1`.
+- **Gestión de Clientes**:
+  - Creación de nuevos clientes con nombre, apellido y DNI único.
+  - Consulta de todos los clientes, por ID o por DNI.
+  - Actualización parcial de la información de los clientes (nombre, apellido, email, teléfono, dirección).
+  - Eliminación de clientes.
 - **Validación de Datos**:
-  - Validación robusta en los campos de los productos (nombre, precio, categoría) utilizando `jakarta.validation`.
+  - Validación robusta en los campos de los productos y clientes utilizando `jakarta.validation`.
 - **Soporte para CORS**:
   - Configuración habilitada para permitir peticiones desde diferentes orígenes, facilitando la integración con aplicaciones frontend modernas (React, Vue, Angular) que corran en puertos distintos.
 - **Manejo Global de Excepciones**:
-  - Respuestas de error estandarizadas para `ProductNotFoundException`, `CategoriaNotFoundException`, `IllegalArgumentException`, errores de validación (`MethodArgumentNotValidException`), JSON malformado (`HttpMessageNotReadableException`) y otros errores inesperados.
+  - Respuestas de error estandarizadas para `ProductNotFoundException`, `CategoriaNotFoundException`, `ClienteNotFoundException`, `InsufficientStockException`, `IllegalArgumentException`, errores de validación (`MethodArgumentNotValidException`), JSON malformado (`HttpMessageNotReadableException`) y otros errores inesperados.
 - **Tecnologías**:
   - Spring Boot
   - Spring Data JPA
   - H2 Database (o cualquier otra base de datos configurada)
-  - Lombok (asumiendo su uso para getters/setters)
 
 ## 📋 Endpoints
 
@@ -219,6 +223,139 @@ La URL base para todos los endpoints es `http://localhost:8080`.
     "message": "Stock insuficiente para realizar la operación. Stock actual: 10",
     "timestamp": "2023-10-27T10:20:00.123456",
     "status": 400
+  }
+  ```
+
+---
+
+### Endpoints de Clientes
+
+Los endpoints para gestionar clientes están bajo el path `/clientes`.
+
+#### 7. Obtener todos los clientes
+
+- **Método:** `GET`
+- **URL:** `/clientes`
+- **Descripción:** Recupera la lista completa de todos los clientes.
+- **Respuesta Exitosa (200 OK):**
+  ```json
+  [
+    {
+      "id": 1,
+      "nombre": "Juan",
+      "apellido": "Perez",
+      "dni": "12345678",
+      "email": "juan@example.com",
+      "telefono": "11223344",
+      "direccion": "Calle Falsa 123"
+    }
+  ]
+  ```
+
+#### 8. Obtener un cliente por ID
+
+- **Método:** `GET`
+- **URL:** `/clientes/{id}`
+- **Descripción:** Recupera los detalles de un cliente específico utilizando su ID.
+- **Respuesta Exitosa (200 OK):**
+  ```json
+  {
+    "id": 1,
+    "nombre": "Juan",
+    "apellido": "Perez",
+    "dni": "12345678",
+    "email": "juan@example.com",
+    "telefono": "11223344",
+    "direccion": "Calle Falsa 123"
+  }
+  ```
+- **Respuesta de Error (404 Not Found):**
+  ```json
+  {
+    "message": "Cliente con ID 99 no encontrado",
+    "timestamp": "2026-06-22T19:00:00.000",
+    "status": 404
+  }
+  ```
+
+#### 9. Obtener un cliente por DNI
+
+- **Método:** `GET`
+- **URL:** `/clientes/dni/{dni}`
+- **Descripción:** Recupera un cliente específico por su DNI.
+- **Respuesta Exitosa (200 OK):** (Igual al formato por ID)
+
+#### 10. Crear un nuevo cliente
+
+- **Método:** `POST`
+- **URL:** `/clientes`
+- **Descripción:** Crea un nuevo cliente. Los campos `nombre`, `apellido` y `dni` son obligatorios. El `dni` debe ser único en el sistema.
+- **Cuerpo de la Solicitud (Request Body):**
+  ```json
+  {
+    "nombre": "María",
+    "apellido": "Gómez",
+    "dni": "87654321",
+    "email": "maria@example.com"
+  }
+  ```
+- **Respuesta Exitosa (201 Created):**
+  ```json
+  {
+    "id": 2,
+    "nombre": "María",
+    "apellido": "Gómez",
+    "dni": "87654321",
+    "email": "maria@example.com",
+    "telefono": null,
+    "direccion": null
+  }
+  ```
+- **Respuesta de Error (400 Bad Request - DNI duplicado o validación fallida):**
+  ```json
+  {
+    "message": "Ya existe un cliente registrado con el DNI 87654321",
+    "timestamp": "2026-06-22T19:00:00.000",
+    "status": 400
+  }
+  ```
+
+#### 11. Actualizar un cliente existente
+
+- **Método:** `PUT`
+- **URL:** `/clientes/{id}`
+- **Descripción:** Actualiza de forma parcial o total un cliente existente. Solo se actualizan los campos provistos no nulos y no vacíos.
+- **Cuerpo de la Solicitud (Request Body):**
+  ```json
+  {
+    "nombre": "María Clara",
+    "direccion": "Avenida Siempre Viva 742"
+  }
+  ```
+- **Respuesta Exitosa (200 OK):**
+  ```json
+  {
+    "id": 2,
+    "nombre": "María Clara",
+    "apellido": "Gómez",
+    "dni": "87654321",
+    "email": "maria@example.com",
+    "telefono": null,
+    "direccion": "Avenida Siempre Viva 742"
+  }
+  ```
+
+#### 12. Eliminar un cliente
+
+- **Método:** `DELETE`
+- **URL:** `/clientes/{id}`
+- **Descripción:** Elimina un cliente por su ID.
+- **Respuesta Exitosa (200 OK):**
+  ```json
+  {
+    "message": "Cliente con ID 2 eliminado exitosamente",
+    "timestamp": "2026-06-22T19:00:00.000",
+    "status": 200
   }
   ```
 
