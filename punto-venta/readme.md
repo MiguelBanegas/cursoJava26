@@ -372,6 +372,8 @@ Los endpoints para gestionar clientes están bajo el path `/clientes`.
 
 Los pedidos se crean asociados a un cliente y pueden incluir varios productos. El flujo recomendado es crear primero un pedido en estado `BORRADOR`, confirmarlo cuando se quiera descontar stock y cancelarlo si hace falta revertir la operación.
 
+Para probar este flujo desde el navegador, también existe una página de simulación en `src/main/resources/static/pedidos.html`.
+
 #### 13. Crear un pedido
 
 - **Método:** `POST`
@@ -461,4 +463,4 @@ Los pedidos se crean asociados a un cliente y pueden incluir varios productos. E
    ```bash
    ./mvnw spring-boot:run
    ```
-4.  La API estará disponible en `http://localhost:8080`. Se puede probar levantando el archivo index.html (resourses>static>index.html) en el navegador, donde se puede hacer una prueba simple en frontend.
+4.  La API estará disponible en `http://localhost:8080`. Se puede probar levantando `index.html` o `pedidos.html` desde `src/main/resources/static` en el navegador.
