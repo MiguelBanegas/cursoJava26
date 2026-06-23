@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Punto de Venta - Pedidos</title>
+    <style>
+        :root {
+            --bg: #0f172a;
+            --bg2: #111827;
+            --panel: rgba(15, 23, 42, 0.86);
+            --card: #f8fafc;
+            --accent: #38bdf8;
+            --accent-2: #22c55e;
+            --danger: #ef4444;
+            --muted: #64748b;
+            --text: #e2e8f0;
+            --border: rgba(148, 163, 184, 0.24);
+            --shadow: 0 18px 50px rgba(2, 6, 23, 0.32);
+        }
+
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: "Segoe UI", system-ui, sans-serif;
+            background:
+                radial-gradient(circle at top left, rgba(56, 189, 248, 0.22), transparent 30%),
+                radial-gradient(circle at top right, rgba(34, 197, 94, 0.16), transparent 28%),
+                linear-gradient(145deg, var(--bg), var(--bg2));
+            color: var(--text);
+        }
+
+        .shell {
+            max-width: 1440px;
+            margin: 0 auto;
+            padding: 24px;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: end;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: clamp(2rem, 4vw, 3.4rem);
+            letter-spacing: -0.03em;
+        }
+
+        .subtitle {
+            color: rgba(226, 232, 240, 0.82);
+            margin-top: 8px;
+        }
+
+        .pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 14px;
+            border-radius: 999px;
+            background: rgba(15, 23, 42, 0.65);
+            border: 1px solid var(--border);
+            backdrop-filter: blur(12px);
+            color: var(--text);
+            box-shadow: var(--shadow);
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1.05fr 1.4fr 0.85fr;
+            gap: 18px;
+            align-items: start;
+        }
+
+        .card {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 18px;
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(14px);
+        }
+
+        .card h2 {
+            margin: 0 0 14px;
+            font-size: 1.1rem;
+            letter-spacing: 0.01em;
+        }
+
+        label {
+            display: block;
+            margin: 12px 0 8px;
+            color: rgba(226, 232, 240, 0.92);
+            font-size: 0.95rem;
+        }
+
+        select, input, button, textarea {
+            width: 100%;
+            border-radius: 12px;
+            border: 1px solid rgba(148, 163, 184, 0.28);
+            background: rgba(15, 23, 42, 0.72);
+            color: var(--text);
+            padding: 12px 14px;
+            font: inherit;
+            outline: none;
+        }
+
+        input::placeholder, textarea::placeholder { color: rgba(226, 232, 240, 0.45); }
+        select:focus, input:focus, textarea:focus { border-color: rgba(56, 189, 248, 0.85); box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.12); }
+
+        .row {
+            display: grid;
+            grid-template-columns: 1.2fr 0.6fr auto;
+            gap: 10px;
+            align-items: end;
+        }
+
+        .btn {
+            cursor: pointer;
+            transition: transform 0.15s ease, opacity 0.15s ease, background 0.15s ease;
+        }
+        .btn:hover { transform: translateY(-1px); }
+        .btn-primary { background: linear-gradient(135deg, #0ea5e9, #2563eb); border-color: transparent; }
+        .btn-success { background: linear-gradient(135deg, #22c55e, #16a34a); border-color: transparent; }
+        .btn-danger { background: linear-gradient(135deg, #ef4444, #dc2626); border-color: transparent; }
+        .btn-ghost { background: rgba(15, 23, 42, 0.58); }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+        .message {
+            margin-top: 12px;
+            border-radius: 14px;
+            padding: 12px 14px;
+            display: none;
+            white-space: pre-wrap;
+        }
+        .message.show { display: block; }
+        .message.error { background: rgba(127, 29, 29, 0.85); color: #fee2e2; border: 1px solid rgba(248, 113, 113, 0.42); }
+        .message.success { background: rgba(20, 83, 45, 0.85); color: #dcfce7; border: 1px solid rgba(74, 222, 128, 0.36); }
+
+        .cart-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            overflow: hidden;
+            border-radius: 14px;
+            background: rgba(2, 6, 23, 0.16);
+        }
+        th, td {
+            padding: 12px 10px;
+            border-bottom: 1px solid rgba(148, 163, 184, 0.18);
+            text-align: left;
+            vertical-align: top;
+        }
+        th {
+            color: rgba(226, 232, 240, 0.92);
+            font-size: 0.9rem;
+            background: rgba(15, 23, 42, 0.74);
+        }
+        td { color: rgba(226, 232, 240, 0.94); }
+        .right { text-align: right; }
+        .muted { color: rgba(226, 232, 240, 0.6); }
+        .total {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 14px;
+            padding: 16px;
+            border-radius: 16px;
+            background: linear-gradient(135deg, rgba(14, 165, 233, 0.16), rgba(34, 197, 94, 0.14));
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            font-size: 1.05rem;
+            font-weight: 700;
+        }
+        .inline-actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 12px;
+        }
+        .small { padding: 9px 12px; width: auto; }
+
+        .summary {
+            display: grid;
+            gap: 12px;
+        }
+        .metric {
+            padding: 14px;
+            border-radius: 16px;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(148, 163, 184, 0.18);
+        }
+        .metric .label {
+            color: rgba(226, 232, 240, 0.68);
+            font-size: 0.88rem;
+        }
+        .metric .value {
+            margin-top: 6px;
+            font-size: 1.1rem;
+            font-weight: 700;
+        }
+
+        .stack {
+            display: grid;
+            gap: 18px;
+        }
+
+        @media (max-width: 1180px) {
+            .grid { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 700px) {
+            .row { grid-template-columns: 1fr; }
+            header { flex-direction: column; align-items: start; }
+            .shell { padding: 16px; }
+            table, thead, tbody, th, td, tr { font-size: 0.92rem; }
+        }
+    </style>
+</head>
+<body>
+<div class="shell">
+    <header>
+        <div>
+            <h1>Punto de Venta</h1>
+            <div class="subtitle">Simulador de pedidos con cliente, carrito, subtotales, total y confirmación contra la API.</div>
+        </div>
+        <div class="pill">API: <strong id="apiBaseLabel">/</strong></div>
+    </header>
+
+    <div class="grid">
+        <section class="stack">
+            <div class="card">
+                <h2>Cliente</h2>
+                <label for="clienteSelect">Seleccionar cliente</label>
+                <select id="clienteSelect"></select>
+                <div class="message" id="clienteHint"></div>
+            </div>
+
+            <div class="card">
+                <h2>Agregar producto</h2>
+                <label for="productoSelect">Producto</label>
+                <select id="productoSelect"></select>
+
+                <div class="row">
+                    <div>
+                        <label for="cantidadInput">Cantidad</label>
+                        <input id="cantidadInput" type="number" min="1" value="1">
+                    </div>
+                    <button class="btn btn-primary" id="agregarBtn">Agregar</button>
+                </div>
+
+                <div class="message" id="addMessage"></div>
+            </div>
+
+            <div class="card">
+                <h2>Mensajes</h2>
+                <div class="message" id="globalMessage"></div>
+                <div class="message" id="errorMessage"></div>
+            </div>
+        </section>
+
+        <section class="card">
+            <div class="cart-head">
+                <div>
+                    <h2 style="margin:0">Pedido actual</h2>
+                    <div class="muted">Si repites un producto, se suma en la misma línea.</div>
+                </div>
+                <button class="btn btn-ghost small" id="limpiarBtn" type="button">Limpiar carrito</button>
+            </div>
+
+            <div style="overflow-x:auto">
+                <table>
+                    <thead>
+                    <tr>
+                        <th>Producto</th>
+                        <th class="right">Cantidad</th>
+                        <th class="right">P. Unitario</th>
+                        <th class="right">Subtotal</th>
+                        <th></th>
+                    </tr>
+                    </thead>
+                    <tbody id="cartBody">
+                    <tr>
+                        <td colspan="5" class="muted">No hay productos cargados.</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="total">
+                <span>Total</span>
+                <span id="totalLabel">$0.00</span>
+            </div>
+
+            <div class="inline-actions">
+                <button class="btn btn-success small" id="confirmarBtn" type="button">Confirmar pedido</button>
+                <button class="btn btn-danger small" id="cancelarBtn" type="button">Cancelar</button>
+            </div>
+        </section>
+
+        <aside class="stack">
+            <div class="card">
+                <h2>Resumen</h2>
+                <div class="summary">
+                    <div class="metric">
+                        <div class="label">Productos distintos</div>
+                        <div class="value" id="distinctCount">0</div>
+                    </div>
+                    <div class="metric">
+                        <div class="label">Unidades totales</div>
+                        <div class="value" id="unitsCount">0</div>
+                    </div>
+                    <div class="metric">
+                        <div class="label">Estado</div>
+                        <div class="value" id="statusLabel">BORRADOR</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>Pedido confirmado</h2>
+                <div class="muted" id="lastOrderInfo">Aún no se confirmó ningún pedido.</div>
+            </div>
+        </aside>
+    </div>
+</div>
+
+<script>
+    const API_BASE = 'http://localhost:8080';
+    const state = {
+        clients: [],
+        products: [],
+        cart: new Map(),
+        lastOrderId: null,
+    };
+
+    const els = {
+        clienteSelect: document.getElementById('clienteSelect'),
+        productoSelect: document.getElementById('productoSelect'),
+        cantidadInput: document.getElementById('cantidadInput'),
+        agregarBtn: document.getElementById('agregarBtn'),
+        limpiarBtn: document.getElementById('limpiarBtn'),
+        confirmarBtn: document.getElementById('confirmarBtn'),
+        cancelarBtn: document.getElementById('cancelarBtn'),
+        cartBody: document.getElementById('cartBody'),
+        totalLabel: document.getElementById('totalLabel'),
+        distinctCount: document.getElementById('distinctCount'),
+        unitsCount: document.getElementById('unitsCount'),
+        statusLabel: document.getElementById('statusLabel'),
+        globalMessage: document.getElementById('globalMessage'),
+        errorMessage: document.getElementById('errorMessage'),
+        addMessage: document.getElementById('addMessage'),
+        clienteHint: document.getElementById('clienteHint'),
+        lastOrderInfo: document.getElementById('lastOrderInfo'),
+        apiBaseLabel: document.getElementById('apiBaseLabel'),
+    };
+
+    els.apiBaseLabel.textContent = API_BASE;
+
+    function money(value) {
+        return new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS' }).format(value);
+    }
+
+    function showMessage(target, text, type = 'success') {
+        const element = els[target];
+        element.textContent = text;
+        element.className = `message show ${type}`;
+    }
+
+    function clearMessage(target) {
+        const element = els[target];
+        element.textContent = '';
+        element.className = 'message';
+    }
+
+    function showError(text) {
+        showMessage('errorMessage', text, 'error');
+    }
+
+    function showGlobal(text, type = 'success') {
+        showMessage('globalMessage', text, type);
+    }
+
+    function clearMessages() {
+        ['errorMessage', 'globalMessage', 'addMessage', 'clienteHint'].forEach(clearMessage);
+    }
+
+    function getSelectedClient() {
+        const id = Number(els.clienteSelect.value);
+        return state.clients.find(client => client.id === id);
+    }
+
+    function getSelectedProduct() {
+        const id = Number(els.productoSelect.value);
+        return state.products.find(product => product.id === id);
+    }
+
+    function normalizeText(value) {
+        return (value ?? '').toString().trim();
+    }
+
+    function updateSummary() {
+        const items = [...state.cart.values()];
+        const total = items.reduce((acc, item) => acc + item.subtotal, 0);
+        const units = items.reduce((acc, item) => acc + item.cantidad, 0);
+
+        els.totalLabel.textContent = money(total);
+        els.distinctCount.textContent = String(items.length);
+        els.unitsCount.textContent = String(units);
+        els.statusLabel.textContent = state.lastOrderId ? 'CONFIRMADO' : 'BORRADOR';
+        renderCart();
+    }
+
+    function renderClients() {
+        els.clienteSelect.innerHTML = '';
+        if (!state.clients.length) {
+            els.clienteSelect.innerHTML = '<option value="">No hay clientes activos</option>';
+            return;
+        }
+        els.clienteSelect.innerHTML = '<option value="">Selecciona un cliente</option>' +
+            state.clients.map(client => `
+                <option value="${client.id}">
+                    ${client.nombre} ${client.apellido} - DNI ${client.dni}
+                </option>
+            `).join('');
+    }
+
+    function renderProducts() {
+        els.productoSelect.innerHTML = '';
+        if (!state.products.length) {
+            els.productoSelect.innerHTML = '<option value="">No hay productos activos</option>';
+            return;
+        }
+        els.productoSelect.innerHTML = '<option value="">Selecciona un producto</option>' +
+            state.products.map(product => `
+                <option value="${product.id}">
+                    ${product.name} - ${money(product.price)} - Stock: ${product.stock ?? 0}
+                </option>
+            `).join('');
+    }
+
+    function renderCart() {
+        const items = [...state.cart.values()];
+        if (!items.length) {
+            els.cartBody.innerHTML = '<tr><td colspan="5" class="muted">No hay productos cargados.</td></tr>';
+            return;
+        }
+
+        els.cartBody.innerHTML = items.map(item => `
+            <tr>
+                <td>
+                    <strong>${item.productName}</strong><br>
+                    <span class="muted">ID ${item.productId}</span>
+                </td>
+                <td class="right">${item.cantidad}</td>
+                <td class="right">${money(item.precioUnitario)}</td>
+                <td class="right">${money(item.subtotal)}</td>
+                <td class="right">
+                    <button class="btn btn-ghost small" type="button" data-remove="${item.productId}">Eliminar</button>
+                </td>
+            </tr>
+        `).join('');
+
+        document.querySelectorAll('[data-remove]').forEach(button => {
+            button.addEventListener('click', () => removeItem(Number(button.dataset.remove)));
+        });
+    }
+
+    function removeItem(productId) {
+        state.cart.delete(productId);
+        updateSummary();
+        clearMessage('addMessage');
+    }
+
+    function clearCart() {
+        state.cart.clear();
+        state.lastOrderId = null;
+        updateSummary();
+        clearMessages();
+        els.cantidadInput.value = 1;
+        els.clienteSelect.value = '';
+        renderCart();
+        showGlobal('Carrito limpiado.', 'success');
+    }
+
+    function addItemToCart() {
+        clearMessages();
+        const product = getSelectedProduct();
+        if (!product) {
+            showError('Selecciona un producto antes de agregarlo.');
+            return;
+        }
+
+        const quantity = Number(els.cantidadInput.value);
+        if (!Number.isInteger(quantity) || quantity <= 0) {
+            showError('La cantidad debe ser un número mayor a cero.');
+            return;
+        }
+
+        const existing = state.cart.get(product.id);
+        const nextQuantity = existing ? existing.cantidad + quantity : quantity;
+        const availableStock = Number(product.stock ?? 0);
+        if (nextQuantity > availableStock) {
+            showError(`Stock insuficiente para ${product.name}. Disponible: ${availableStock}.`);
+            return;
+        }
+
+        const price = Number(product.price);
+        const line = existing ?? {
+            productId: product.id,
+            productName: product.name,
+            cantidad: 0,
+            precioUnitario: price,
+            subtotal: 0,
+        };
+
+        line.cantidad = nextQuantity;
+        line.precioUnitario = price;
+        line.subtotal = line.cantidad * line.precioUnitario;
+        state.cart.set(product.id, line);
+
+        updateSummary();
+        showMessage('addMessage', existing
+            ? `Se sumaron ${quantity} unidades a ${product.name}.`
+            : `Se agregó ${product.name} al pedido.`, 'success');
+    }
+
+    async function loadClients() {
+        const response = await fetch(`${API_BASE}/clientes`);
+        if (!response.ok) {
+            throw new Error(`No se pudieron cargar los clientes (${response.status})`);
+        }
+        state.clients = await response.json();
+        renderClients();
+        const client = getSelectedClient();
+        els.clienteHint.textContent = client
+            ? `${client.nombre} ${client.apellido} seleccionado.`
+            : 'Selecciona un cliente para asociarlo al pedido.';
+    }
+
+    async function loadProducts() {
+        const response = await fetch(`${API_BASE}/products`);
+        if (!response.ok) {
+            throw new Error(`No se pudieron cargar los productos (${response.status})`);
+        }
+        state.products = await response.json();
+        renderProducts();
+    }
+
+    async function confirmOrder() {
+        clearMessages();
+        const client = getSelectedClient();
+        if (!client) {
+            showError('Debes seleccionar un cliente para confirmar el pedido.');
+            return;
+        }
+
+        const items = [...state.cart.values()].map(item => ({
+            productId: item.productId,
+            cantidad: item.cantidad
+        }));
+
+        if (!items.length) {
+            showError('El pedido está vacío. Agrega al menos un producto.');
+            return;
+        }
+
+        try {
+            const createResponse = await fetch(`${API_BASE}/pedidos`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    clienteId: client.id,
+                    items
+                })
+            });
+
+            const createData = await parseResponse(createResponse);
+            if (!createResponse.ok) {
+                throw new Error(extractErrorMessage(createData));
+            }
+
+            const orderId = createData.id;
+            const confirmResponse = await fetch(`${API_BASE}/pedidos/${orderId}/confirmar`, {
+                method: 'POST'
+            });
+
+            const confirmData = await parseResponse(confirmResponse);
+            if (!confirmResponse.ok) {
+                throw new Error(extractErrorMessage(confirmData));
+            }
+
+            state.lastOrderId = orderId;
+            showGlobal(`Pedido ${orderId} confirmado correctamente. Total: ${money(confirmData.total ?? createData.total ?? 0)}.`, 'success');
+            els.lastOrderInfo.textContent = `Pedido #${orderId} confirmado para ${confirmData.clienteNombre}. Total: ${money(confirmData.total ?? 0)}.`;
+            state.cart.clear();
+            updateSummary();
+            renderCart();
+        } catch (error) {
+            showError(error.message || 'No se pudo confirmar el pedido.');
+        }
+    }
+
+    async function cancelOrder() {
+        clearMessages();
+        if (state.cart.size === 0 && !state.lastOrderId) {
+            showGlobal('No hay pedido activo. Se limpiaron los mensajes.', 'success');
+            return;
+        }
+
+        if (state.cart.size > 0 && !state.lastOrderId) {
+            clearCart();
+            return;
+        }
+
+        if (state.lastOrderId) {
+            try {
+                const response = await fetch(`${API_BASE}/pedidos/${state.lastOrderId}/cancelar`, {
+                    method: 'POST'
+                });
+                const data = await parseResponse(response);
+                if (!response.ok) {
+                    throw new Error(extractErrorMessage(data));
+                }
+                showGlobal(`Pedido ${state.lastOrderId} cancelado correctamente.`, 'success');
+                els.lastOrderInfo.textContent = `Pedido #${state.lastOrderId} cancelado.`;
+                state.lastOrderId = null;
+                updateSummary();
+            } catch (error) {
+                showError(error.message || 'No se pudo cancelar el pedido.');
+            }
+            return;
+        }
+
+        clearCart();
+    }
+
+    async function parseResponse(response) {
+        const contentType = response.headers.get('content-type') || '';
+        if (contentType.includes('application/json')) {
+            return response.json();
+        }
+        return response.text();
+    }
+
+    function extractErrorMessage(payload) {
+        if (typeof payload === 'string' && payload.trim()) {
+            return payload;
+        }
+        if (payload && typeof payload === 'object') {
+            if (payload.message) return payload.message;
+            if (payload.data && typeof payload.data === 'object') {
+                return Object.entries(payload.data)
+                    .map(([field, message]) => `${field}: ${message}`)
+                    .join('\n');
+            }
+        }
+        return 'Ocurrió un error inesperado.';
+    }
+
+    els.agregarBtn.addEventListener('click', addItemToCart);
+    els.limpiarBtn.addEventListener('click', clearCart);
+    els.confirmarBtn.addEventListener('click', confirmOrder);
+    els.cancelarBtn.addEventListener('click', cancelOrder);
+
+    els.clienteSelect.addEventListener('change', () => {
+        const client = getSelectedClient();
+        els.clienteHint.textContent = client
+            ? `${client.nombre} ${client.apellido} seleccionado.`
+            : 'Selecciona un cliente para asociarlo al pedido.';
+    });
+
+    els.productoSelect.addEventListener('change', () => {
+        const product = getSelectedProduct();
+        if (product) {
+            els.addMessage.textContent = `${product.name} seleccionado. Stock disponible: ${product.stock ?? 0}.`;
+            els.addMessage.className = 'message show success';
+        }
+    });
+
+    (async function init() {
+        try {
+            await Promise.all([loadClients(), loadProducts()]);
+            updateSummary();
+            showGlobal('Datos cargados. Ya podés simular un pedido.', 'success');
+            els.clienteHint.textContent = 'Selecciona un cliente para asociarlo al pedido.';
+        } catch (error) {
+            showError(`No se pudo inicializar la pantalla: ${error.message}`);
+        }
+    })();
+</script>
+</body>
+</html>

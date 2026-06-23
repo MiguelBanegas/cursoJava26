@@ -23,16 +23,16 @@ public class ProductService {
         this.categoriaService = categoriaService;
     }
 
-    public List<Product> getAllProducts() { // Método que devuelve una lista de todos los productos almacenados en la base de datos utilizando el método findAll() del repositorio
-        return productRepository.findAll();
+    public List<Product> getAllProducts() { // Método que devuelve una lista de todos los productos ACTIVOS almacenados en la base de datos
+        return productRepository.findByActivoTrue();
     }
 
-    public Product getProductById(Long id) { // Método que devuelve un producto específico por su ID. 
-                                            // Si el producto no existe, lanza una excepción ProductNotFoundException.
+    public Product getProductById(Long id) { // Método que devuelve un producto activo por su ID.
+                                            // Si el producto no existe o fue eliminado, lanza ProductNotFoundException.
         if (id == null) {
             throw new IllegalArgumentException("El ID del producto no puede ser nulo");
         }
-        return productRepository.findById(id)
+        return productRepository.findByIdAndActivoTrue(id)
                 .orElseThrow(() -> new ProductNotFoundException("Producto con ID " + id + " no encontrado"));
     }
 
@@ -48,6 +48,13 @@ public class ProductService {
         // Validamos que la categoría exista antes de guardar el producto
         product.setCategoria(categoriaService.getCategoriaById(product.getCategoria().getId()));
 
+        return productRepository.save(product);
+    }
+
+    public Product saveProduct(Product product) {
+        if (product == null) {
+            throw new IllegalArgumentException("El producto no puede ser nulo");
+        }
         return productRepository.save(product);
     }
 
@@ -84,10 +91,9 @@ public class ProductService {
         if (id == null) {
             throw new IllegalArgumentException("El ID para eliminar no puede ser nulo");
         }
-        if (!productRepository.existsById(id)) {
-            throw new ProductNotFoundException("Producto con ID " + id + " no encontrado");
-        }
-        productRepository.deleteById(id);
+        Product product = getProductById(id); // Lanza ProductNotFoundException si no existe o ya está inactivo
+        product.setActivo(false); // Soft delete: marcamos como inactivo en lugar de borrar físicamente
+        productRepository.save(product);
     }
 
     public Product actualizarStock(Long id, StockUpdateDTO dto) {

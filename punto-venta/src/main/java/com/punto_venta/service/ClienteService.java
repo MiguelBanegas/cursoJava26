@@ -18,22 +18,26 @@ public class ClienteService {
     }
 
     public List<Cliente> getAllClientes() {
-        return clienteRepository.findAll();
+        return clienteRepository.findByActivoTrue();
     }
 
     public Cliente getClienteById(Long id) {
         if (id == null) {
             throw new IllegalArgumentException("El ID del cliente no puede ser nulo");
         }
-        return clienteRepository.findById(id)
+        return clienteRepository.findByIdAndActivoTrue(id)
                 .orElseThrow(() -> new ClienteNotFoundException("Cliente con ID " + id + " no encontrado"));
+    }
+
+    public Cliente getClienteActivoById(Long id) {
+        return getClienteById(id);
     }
 
     public Cliente getClienteByDni(String dni) {
         if (dni == null || dni.isBlank()) {
             throw new IllegalArgumentException("El DNI no puede estar vacío");
         }
-        return clienteRepository.findByDni(dni)
+        return clienteRepository.findByDniAndActivoTrue(dni)
                 .orElseThrow(() -> new ClienteNotFoundException("Cliente con DNI " + dni + " no encontrado"));
     }
 
@@ -59,7 +63,7 @@ public class ClienteService {
             throw new IllegalArgumentException("Los datos de actualización no pueden ser nulos");
         }
 
-        return clienteRepository.findById(id).map(existingCliente -> {
+        return clienteRepository.findByIdAndActivoTrue(id).map(existingCliente -> {
             // Validar y actualizar el nombre
             if (updatedCliente.getNombre() != null && !updatedCliente.getNombre().isBlank()) {
                 existingCliente.setNombre(updatedCliente.getNombre());
@@ -102,9 +106,8 @@ public class ClienteService {
         if (id == null) {
             throw new IllegalArgumentException("El ID para eliminar no puede ser nulo");
         }
-        if (!clienteRepository.existsById(id)) {
-            throw new ClienteNotFoundException("Cliente con ID " + id + " no encontrado");
-        }
-        clienteRepository.deleteById(id);
+        Cliente cliente = getClienteById(id);
+        cliente.setActivo(false);
+        clienteRepository.save(cliente);
     }
 }

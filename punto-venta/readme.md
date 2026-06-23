@@ -1,6 +1,6 @@
 # API de Punto de Venta
 
-Esta es una API RESTful para gestionar productos y clientes en un sistema de punto de venta. Permite realizar operaciones CRUD (Crear, Leer, Actualizar, Eliminar) sobre productos (con sus categorías) y clientes.
+Esta es una API RESTful para gestionar productos, clientes y pedidos en un sistema de punto de venta. Permite realizar operaciones CRUD sobre productos (con sus categorías), clientes y pedidos, con borrado lógico para productos y clientes.
 
 ## 🚀 Características
 
@@ -8,7 +8,7 @@ Esta es una API RESTful para gestionar productos y clientes en un sistema de pun
   - Creación de nuevos productos con nombre, precio y categoría.
   - Consulta de todos los productos o de un producto específico por su ID.
   - Actualización parcial de productos (nombre, precio, categoría).
-  - Eliminación de productos.
+  - Eliminación lógica de productos mediante soft delete.
   - Control de stock con operaciones de Agregar, Restar y Ajustar.
 - **Gestión de Categorías**:
   - Cada producto está asociado a una categoría existente.
@@ -17,9 +17,18 @@ Esta es una API RESTful para gestionar productos y clientes en un sistema de pun
   - Creación de nuevos clientes con nombre, apellido y DNI único.
   - Consulta de todos los clientes, por ID o por DNI.
   - Actualización parcial de la información de los clientes (nombre, apellido, email, teléfono, dirección).
-  - Eliminación de clientes.
+  - Eliminación lógica de clientes mediante soft delete.
+- **Gestión de Pedidos**:
+  - Creación de pedidos asociados a un cliente con varios productos.
+  - Confirmación de pedidos con descuento de stock.
+  - Cancelación de pedidos confirmados con restitución de stock.
+  - Consulta de pedidos por ID, por cliente, por estado y por rango de fechas.
 - **Validación de Datos**:
   - Validación robusta en los campos de los productos y clientes utilizando `jakarta.validation`.
+- **Soft Delete**:
+  - Los productos y clientes no se eliminan físicamente de la base de datos.
+  - Las búsquedas y listados normales devuelven solo registros activos.
+  - Los pedidos históricos se conservan aunque el cliente o producto se den de baja luego.
 - **Soporte para CORS**:
   - Configuración habilitada para permitir peticiones desde diferentes orígenes, facilitando la integración con aplicaciones frontend modernas (React, Vue, Angular) que corran en puertos distintos.
 - **Manejo Global de Excepciones**:
@@ -38,7 +47,7 @@ La URL base para todos los endpoints es `http://localhost:8080`.
 
 - **Método:** `GET`
 - **URL:** `/products`
-- **Descripción:** Recupera una lista de todos los productos existentes en la base de datos.
+- **Descripción:** Recupera una lista de todos los productos activos existentes en la base de datos.
 - **Respuesta Exitosa (200 OK):**
   ```json
   [
@@ -173,7 +182,7 @@ La URL base para todos los endpoints es `http://localhost:8080`.
 
 - **Método:** `DELETE`
 - **URL:** `/products/{id}`
-- **Descripción:** Elimina un producto específico por su ID.
+- **Descripción:** Marca un producto como inactivo. El registro permanece en la base de datos.
 - **Respuesta Exitosa (200 OK):**
   ```json
   {
@@ -236,7 +245,7 @@ Los endpoints para gestionar clientes están bajo el path `/clientes`.
 
 - **Método:** `GET`
 - **URL:** `/clientes`
-- **Descripción:** Recupera la lista completa de todos los clientes.
+- **Descripción:** Recupera la lista completa de todos los clientes activos.
 - **Respuesta Exitosa (200 OK):**
   ```json
   [
@@ -349,7 +358,7 @@ Los endpoints para gestionar clientes están bajo el path `/clientes`.
 
 - **Método:** `DELETE`
 - **URL:** `/clientes/{id}`
-- **Descripción:** Elimina un cliente por su ID.
+- **Descripción:** Marca un cliente como inactivo. El registro permanece en la base de datos.
 - **Respuesta Exitosa (200 OK):**
   ```json
   {
@@ -358,6 +367,91 @@ Los endpoints para gestionar clientes están bajo el path `/clientes`.
     "status": 200
   }
   ```
+
+### Endpoints de Pedidos
+
+Los pedidos se crean asociados a un cliente y pueden incluir varios productos. El flujo recomendado es crear primero un pedido en estado `BORRADOR`, confirmarlo cuando se quiera descontar stock y cancelarlo si hace falta revertir la operación.
+
+#### 13. Crear un pedido
+
+- **Método:** `POST`
+- **URL:** `/pedidos`
+- **Descripción:** Crea un pedido borrador para un cliente activo.
+- **Cuerpo de la Solicitud (Request Body):**
+  ```json
+  {
+    "clienteId": 1,
+    "items": [
+      { "productId": 2, "cantidad": 3 },
+      { "productId": 4, "cantidad": 1 }
+    ]
+  }
+  ```
+- **Respuesta Exitosa (201 Created):**
+  ```json
+  {
+    "id": 15,
+    "clienteId": 1,
+    "clienteNombre": "Juan Perez",
+    "estado": "BORRADOR",
+    "createdAt": "2026-06-23T10:15:00",
+    "updatedAt": null,
+    "confirmedAt": null,
+    "total": 4500.0,
+    "items": [
+      {
+        "id": 1,
+        "productId": 2,
+        "productName": "Mouse",
+        "cantidad": 3,
+        "precioUnitario": 1000.0,
+        "subtotal": 3000.0
+      }
+    ]
+  }
+  ```
+
+#### 14. Confirmar un pedido
+
+- **Método:** `POST`
+- **URL:** `/pedidos/{id}/confirmar`
+- **Descripción:** Cambia el pedido a `CONFIRMADO` y descuenta el stock de los productos incluidos.
+
+#### 15. Cancelar un pedido
+
+- **Método:** `POST`
+- **URL:** `/pedidos/{id}/cancelar`
+- **Descripción:** Cambia el pedido a `CANCELADO`. Si el pedido estaba confirmado, devuelve el stock asociado.
+
+#### 16. Obtener todos los pedidos
+
+- **Método:** `GET`
+- **URL:** `/pedidos`
+- **Descripción:** Devuelve todos los pedidos cargados.
+
+#### 17. Obtener un pedido por ID
+
+- **Método:** `GET`
+- **URL:** `/pedidos/{id}`
+- **Descripción:** Recupera el detalle completo de un pedido.
+
+#### 18. Obtener pedidos por cliente
+
+- **Método:** `GET`
+- **URL:** `/pedidos/cliente/{clienteId}`
+- **Descripción:** Devuelve todos los pedidos asociados a un cliente específico.
+
+#### 19. Obtener pedidos por estado
+
+- **Método:** `GET`
+- **URL:** `/pedidos/estado/{estado}`
+- **Descripción:** Filtra pedidos por estado. Valores válidos: `BORRADOR`, `CONFIRMADO`, `CANCELADO`.
+
+#### 20. Obtener pedidos por rango de fechas
+
+- **Método:** `GET`
+- **URL:** `/pedidos/rango?desde=2026-06-01T00:00:00&hasta=2026-06-30T23:59:59`
+- **Descripción:** Devuelve los pedidos creados dentro del rango indicado.
 
 ## 🛠️ Cómo Iniciar la Aplicación
 

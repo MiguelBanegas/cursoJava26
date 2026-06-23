@@ -32,6 +32,9 @@ public class Product {
     @NotNull(message = "La categoría es obligatoria")
     private Categoria categoria;
 
+    @Column(columnDefinition = "boolean default true")
+    private boolean activo = true;
+
     @Column(columnDefinition = "integer default 0")
     @Min(value = 0, message = "El stock no puede ser negativo")
     private Integer stock = 0;
@@ -83,5 +86,13 @@ public class Product {
 
     public void setStock(Integer stock) {
         this.stock = stock;
+    }
+
+    public boolean isActivo() {
+        return activo;
+    }
+
+    public void setActivo(boolean activo) {
+        this.activo = activo;
     }
 }

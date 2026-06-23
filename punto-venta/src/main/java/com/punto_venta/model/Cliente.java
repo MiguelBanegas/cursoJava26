@@ -36,6 +36,9 @@ public class Cliente {
 
     private String direccion;
 
+    @Column(columnDefinition = "boolean default true")
+    private boolean activo = true;
+
     public Cliente() {
     }
 
@@ -108,5 +111,13 @@ public class Cliente {
 
     public void setDireccion(String direccion) {
         this.direccion = direccion;
+    }
+
+    public boolean isActivo() {
+        return activo;
+    }
+
+    public void setActivo(boolean activo) {
+        this.activo = activo;
     }
 }

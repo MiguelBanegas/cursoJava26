@@ -2,7 +2,9 @@ package com.punto_venta.controller;
 
 import com.punto_venta.model.Cliente;
 import com.punto_venta.model.ApiResponse;
+import com.punto_venta.dto.PedidoResponseDTO;
 import com.punto_venta.service.ClienteService;
+import com.punto_venta.service.PedidoService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNull;
@@ -16,9 +18,11 @@ import java.util.List;
 public class ClienteController {
 
     private final ClienteService clienteService;
+    private final PedidoService pedidoService;
 
-    public ClienteController(ClienteService clienteService) {
+    public ClienteController(ClienteService clienteService, PedidoService pedidoService) {
         this.clienteService = clienteService;
+        this.pedidoService = pedidoService;
     }
 
     @GetMapping
@@ -56,5 +60,10 @@ public class ClienteController {
         clienteService.deleteCliente(id);
         ApiResponse response = new ApiResponse("Cliente con ID " + id + " eliminado exitosamente", HttpStatus.OK.value());
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/{id}/pedidos")
+    public ResponseEntity<List<PedidoResponseDTO>> getPedidosByCliente(@PathVariable Long id) {
+        return ResponseEntity.ok(pedidoService.getPedidosByCliente(id));
     }
 }

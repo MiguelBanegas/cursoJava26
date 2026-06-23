@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.punto_venta.exception.ClienteNotFoundException;
 import com.punto_venta.model.Cliente;
 import com.punto_venta.service.ClienteService;
+import com.punto_venta.service.PedidoService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,6 +36,10 @@ public class ClienteControllerTest {
     @SuppressWarnings("removal")
     @MockBean
     private ClienteService clienteService;
+
+    @SuppressWarnings("removal")
+    @MockBean
+    private PedidoService pedidoService;
 
     @Autowired
     private ObjectMapper objectMapper;
