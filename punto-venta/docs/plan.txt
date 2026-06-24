@@ -1,0 +1,19 @@
+Lo dejo como plan de trabajo para retomarlo después:
+
+1. Crear `User` y `Role`.
+2. Crear `UserRepository`.
+3. Crear `AuthService`.
+4. Implementar `JwtService`.
+5. Implementar `JwtAuthenticationFilter`.
+6. Configurar `SecurityConfig`.
+7. Exponer `/auth/login` y, si hace falta, `/auth/register`.
+8. Proteger endpoints por rol.
+9. Documentar el flujo en `readme.md`.
+10. Validar login, token válido, token vencido y acceso denegado.
+
+Recomendación de diseño:
+- `Cliente` sigue siendo entidad de negocio.
+- `User` queda separado para autenticación.
+- Roles sugeridos: `ADMIN` y `USER`.
+
+Si más adelante querés implementarlo, arrancamos por `User` + `Role` y seguimos en ese orden.
