@@ -38,6 +38,12 @@ Esta es una API RESTful para gestionar productos, clientes y pedidos en un siste
   - Spring Data JPA
   - H2 Database (o cualquier otra base de datos configurada)
 
+## 🗃️ DER del proyecto
+
+El siguiente diagrama resume las entidades principales y sus relaciones en la base de datos.
+
+![DER del proyecto](docs/der.png)
+
 ## 📋 Endpoints
 
 A continuación, se detallan los endpoints disponibles en la API y cómo utilizarlos.
