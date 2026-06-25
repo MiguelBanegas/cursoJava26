@@ -82,6 +82,14 @@ public class ProductService {
             if (updatedProduct.getCategoria() != null && updatedProduct.getCategoria().getId() != null) {
                 existingProduct.setCategoria(categoriaService.getCategoriaById(updatedProduct.getCategoria().getId()));
             }
+
+            // Solo actualizamos el stock si se envió un valor válido
+            if (updatedProduct.getStock() != null) {
+                if (updatedProduct.getStock() < 0) {
+                    throw new IllegalArgumentException("El stock no puede ser negativo");
+                }
+                existingProduct.setStock(updatedProduct.getStock());
+            }
             
             return productRepository.save(existingProduct);
         }).orElseThrow(() -> new ProductNotFoundException("No se puede actualizar: Producto con ID " + id + " no encontrado"));

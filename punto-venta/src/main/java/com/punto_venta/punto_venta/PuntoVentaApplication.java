@@ -8,16 +8,14 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean; // Importa la anotación Bean para definir un bean de Spring que se ejecutará al iniciar la aplicación
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 
 import com.punto_venta.repository.ProductRepository;
 
-@SpringBootApplication // Anotación que indica que esta clase es la clase principal de una aplicación Spring Boot. Incluye @Configuration, @EnableAutoConfiguration y @ComponentScan por defecto.
-@ComponentScan("com.punto_venta")
-@EntityScan("com.punto_venta.model")
-@EnableJpaRepositories("com.punto_venta.repository")
+@SpringBootApplication(scanBasePackages = "com.punto_venta")
+@EntityScan(basePackages = "com.punto_venta.model")
+@EnableJpaRepositories(basePackages = "com.punto_venta.repository")
 public class PuntoVentaApplication {
 
 	private static final Logger log = LoggerFactory.getLogger(PuntoVentaApplication.class);

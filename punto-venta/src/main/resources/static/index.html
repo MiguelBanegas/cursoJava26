@@ -218,6 +218,7 @@
         <header>
             <h1>🛒 Punto de Venta</h1>
             <p>Sistema de gestión de categorías y productos</p>
+            <p><a href="pedidos.html" style="color: white; text-decoration: underline;">Ir a pedidos</a></p>
         </header>
 
         <div class="content">
@@ -299,6 +300,10 @@
                         <option value="">Cargando categorías...</option>
                     </select>
                 </div>
+                <div class="form-group">
+                    <label for="updateProductStock">Nuevo Stock</label>
+                    <input type="number" id="updateProductStock" placeholder="Nuevo stock" min="0">
+                </div>
                 <button onclick="updateProduct()">✏️ Actualizar Producto</button>
             </div>
         </div>
@@ -319,10 +324,10 @@
         </div>
     </div>
 
+    <script src="/config.js"></script>
     <script>
-        const API_URL = 'http://localhost:8080';
+        const API_URL = window.APP_CONFIG?.apiUrl || 'http://localhost:8080';
 
-        // Cargar categorías al iniciar
         window.addEventListener('DOMContentLoaded', () => {
             loadCategories();
             loadProducts();
@@ -545,7 +550,10 @@
                     })
                 });
 
-                if (!response.ok) throw new Error(`Error: ${response.status}`);
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`Error: ${response.status} - ${errorText}`);
+                }
                 
                 showMessage('productMessage', '✅ Producto creado exitosamente', 'success');
                 document.getElementById('productName').value = '';
@@ -582,8 +590,9 @@
             const name = document.getElementById('updateProductName').value.trim();
             const price = document.getElementById('updateProductPrice').value;
             const categoriaId = document.getElementById('updateProductCategory').value;
+            const stock = document.getElementById('updateProductStock').value;
 
-            if (!id || !name || !price || !categoriaId) {
+            if (!id || !name || !price || !categoriaId || stock === '') {
                 showMessage('productMessage', 'Por favor completa todos los campos para actualizar el producto', 'error');
                 return;
             }
@@ -595,7 +604,8 @@
                     body: JSON.stringify({
                         name,
                         price: parseFloat(price),
-                        categoria: { id: parseInt(categoriaId) }
+                        categoria: { id: parseInt(categoriaId) },
+                        stock: parseInt(stock)
                     })
                 });
 
@@ -609,6 +619,7 @@
                 document.getElementById('updateProductName').value = '';
                 document.getElementById('updateProductPrice').value = '';
                 document.getElementById('updateProductCategory').value = '';
+                document.getElementById('updateProductStock').value = '';
                 
                 loadProducts();
             } catch (error) {
@@ -625,13 +636,14 @@
                 return;
             }
 
-            let html = '<table><thead><tr><th>ID</th><th>Nombre</th><th>Precio</th><th>Categoría</th><th>ID Cat.</th><th>Acciones</th></tr></thead><tbody>';
+            let html = '<table><thead><tr><th>ID</th><th>Nombre</th><th>Precio</th><th>Stock</th><th>Categoría</th><th>ID Cat.</th><th>Acciones</th></tr></thead><tbody>';
             products.forEach(prod => {
                 html += `
                     <tr>
                         <td>${prod.id}</td>
                         <td>${prod.name}</td>
                         <td>$${prod.price.toFixed(2)}</td>
+                        <td>${prod.stock ?? 0}</td>
                         <td>${prod.categoria.nombre}</td>
                         <td>${prod.categoria.id}</td>
                         <td>
@@ -656,9 +668,8 @@
                 document.getElementById('updateProductId').value = product.id;
                 document.getElementById('updateProductName').value = product.name;
                 document.getElementById('updateProductPrice').value = product.price;
-                // Asegúrate de que la categoría se cargue en el select correctamente
-                // Esto podría necesitar un pequeño retraso o lógica adicional si el select no está completamente cargado
                 document.getElementById('updateProductCategory').value = product.categoria.id;
+                document.getElementById('updateProductStock').value = product.stock ?? 0;
             } catch (error) {
                 console.error('Error cargando producto para editar:', error);
                 showMessage('productMessage', '❌ Error al cargar producto para editar', 'error');
