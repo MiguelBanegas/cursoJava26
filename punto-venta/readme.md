@@ -469,4 +469,5 @@ Para probar este flujo desde el navegador, también existe una página de simula
    ```bash
    ./mvnw spring-boot:run
    ```
-4.  La API estará disponible en `http://localhost:8080`. Se puede probar levantando `index.html` o `pedidos.html` desde `src/main/resources/static` en el navegador.
+4.  La API estará disponible en `http://localhost:8080`. Se puede probar levantando `index.html` o `pedidos.html` desde `src/main/resources/static` en el navegador. 
+  Tambien esta disponible en https://apijava26.mabcontrol.ar
