@@ -11,8 +11,10 @@ Esta es una API RESTful para gestionar productos, clientes y pedidos en un siste
   - Eliminación lógica de productos mediante soft delete.
   - Control de stock con operaciones de Agregar, Restar y Ajustar.
 - **Gestión de Categorías**:
+  - CRUD completo bajo `/categorias`.
   - Cada producto está asociado a una categoría existente.
-  - Verificación automática de categorías: Si la base de datos de categorías está vacía al iniciar la aplicación, se crea una categoría `GENERAL` por defecto con ID `1`.
+  - Categoría `GENERAL` (ID `1`) creada automáticamente si la tabla está vacía al iniciar.
+  - Al eliminar una categoría, sus productos pasan a `GENERAL`. La categoría `GENERAL` no puede eliminarse.
 - **Gestión de Clientes**:
   - Creación de nuevos clientes con nombre, apellido y DNI único.
   - Consulta de todos los clientes, por ID o por DNI.
@@ -63,8 +65,8 @@ La URL base para todos los endpoints es `http://localhost:8080`.
       "price": 1.5,
       "categoria": {
         "id": 1,
-        "name": "Frutas",
-        "description": "Frutas frescas"
+        "nombre": "Frutas",
+        "descripcion": "Frutas frescas"
       }
     },
     {
@@ -73,8 +75,8 @@ La URL base para todos los endpoints es `http://localhost:8080`.
       "price": 2.2,
       "categoria": {
         "id": 2,
-        "name": "Lácteos",
-        "description": "Productos lácteos"
+        "nombre": "Lácteos",
+        "descripcion": "Productos lácteos"
       }
     }
   ]
@@ -93,8 +95,8 @@ La URL base para todos los endpoints es `http://localhost:8080`.
     "price": 1.5,
     "categoria": {
       "id": 1,
-      "name": "Frutas",
-      "description": "Frutas frescas"
+      "nombre": "Frutas",
+      "descripcion": "Frutas frescas"
     }
   }
   ```
@@ -130,8 +132,8 @@ La URL base para todos los endpoints es `http://localhost:8080`.
     "price": 3.0,
     "categoria": {
       "id": 1,
-      "name": "GENERAL",
-      "description": "Categoría por defecto para productos"
+      "nombre": "GENERAL",
+      "descripcion": "Categoría por defecto para productos"
     }
   }
   ```
@@ -149,7 +151,7 @@ La URL base para todos los endpoints es `http://localhost:8080`.
   O si la categoría no existe:
   ```json
   {
-    "message": "Categoría con ID 999 no encontrada",
+    "message": "Categoría no encontrada con ID: 999",
     "timestamp": "2023-10-27T10:05:00.123456",
     "status": 404
   }
@@ -177,8 +179,8 @@ La URL base para todos los endpoints es `http://localhost:8080`.
     "price": 3.5,
     "categoria": {
       "id": 2,
-      "name": "Lácteos",
-      "description": "Productos lácteos"
+      "nombre": "Lácteos",
+      "descripcion": "Productos lácteos"
     }
   }
   ```
@@ -227,8 +229,8 @@ La URL base para todos los endpoints es `http://localhost:8080`.
     "stock": 15,
     "categoria": {
       "id": 1,
-      "name": "Frutas",
-      "description": "Frutas frescas"
+      "nombre": "Frutas",
+      "descripcion": "Frutas frescas"
     }
   }
   ```
@@ -243,11 +245,143 @@ La URL base para todos los endpoints es `http://localhost:8080`.
 
 ---
 
+### Endpoints de Categorías
+
+Los endpoints para gestionar categorías están bajo el path `/categorias`. Cada producto debe estar asociado a una categoría existente. Al iniciar la aplicación, si no hay categorías en la base de datos, se crea automáticamente la categoría `GENERAL` con ID `1`.
+
+> **Nota:** Al eliminar una categoría, los productos asociados se reasignan automáticamente a `GENERAL`. La categoría con ID `1` no puede eliminarse.
+
+#### 7. Obtener todas las categorías
+
+- **Método:** `GET`
+- **URL:** `/categorias`
+- **Descripción:** Recupera la lista completa de categorías registradas.
+- **Respuesta Exitosa (200 OK):**
+  ```json
+  [
+    {
+      "id": 1,
+      "nombre": "GENERAL",
+      "descripcion": "Categoría por defecto para productos"
+    },
+    {
+      "id": 2,
+      "nombre": "Frutas",
+      "descripcion": "Frutas frescas"
+    }
+  ]
+  ```
+
+#### 8. Obtener una categoría por ID
+
+- **Método:** `GET`
+- **URL:** `/categorias/{id}`
+- **Descripción:** Recupera los detalles de una categoría específica utilizando su ID.
+- **Respuesta Exitosa (200 OK):**
+  ```json
+  {
+    "id": 2,
+    "nombre": "Frutas",
+    "descripcion": "Frutas frescas"
+  }
+  ```
+- **Respuesta de Error (404 Not Found):**
+  ```json
+  {
+    "message": "Categoría no encontrada con ID: 999",
+    "timestamp": "2026-06-25T10:00:00.123456",
+    "status": 404
+  }
+  ```
+
+#### 9. Crear una nueva categoría
+
+- **Método:** `POST`
+- **URL:** `/categorias`
+- **Descripción:** Crea una nueva categoría. El campo `nombre` es obligatorio y debe ser único. La `descripcion` es opcional.
+- **Cuerpo de la Solicitud (Request Body):**
+  ```json
+  {
+    "nombre": "Lácteos",
+    "descripcion": "Productos lácteos"
+  }
+  ```
+- **Respuesta Exitosa (201 Created):**
+  ```json
+  {
+    "id": 3,
+    "nombre": "Lácteos",
+    "descripcion": "Productos lácteos"
+  }
+  ```
+- **Respuesta de Error (400 Bad Request - nombre vacío):**
+  ```json
+  {
+    "message": "El nombre de la categoría no puede estar vacío",
+    "timestamp": "2026-06-25T10:05:00.123456",
+    "status": 400
+  }
+  ```
+
+#### 10. Actualizar una categoría existente
+
+- **Método:** `PUT`
+- **URL:** `/categorias/{id}`
+- **Descripción:** Actualiza de forma parcial una categoría existente. Solo se actualizan los campos provistos: `nombre` (si no es nulo ni vacío) y `descripcion` (si no es nulo).
+- **Cuerpo de la Solicitud (Request Body):**
+  ```json
+  {
+    "nombre": "Lácteos y derivados",
+    "descripcion": "Leche, queso, yogur y similares"
+  }
+  ```
+- **Respuesta Exitosa (200 OK):**
+  ```json
+  {
+    "id": 3,
+    "nombre": "Lácteos y derivados",
+    "descripcion": "Leche, queso, yogur y similares"
+  }
+  ```
+- **Respuesta de Error (404 Not Found):** Similar al endpoint de obtención por ID.
+
+#### 11. Eliminar una categoría
+
+- **Método:** `DELETE`
+- **URL:** `/categorias/{id}`
+- **Descripción:** Elimina físicamente una categoría. Antes de eliminarla, reasigna todos sus productos a la categoría `GENERAL` (ID `1`). No es posible eliminar la categoría `GENERAL`.
+- **Respuesta Exitosa (200 OK):**
+  ```json
+  {
+    "message": "Categoría eliminada correctamente",
+    "timestamp": "2026-06-25T10:15:00.123456",
+    "status": 200
+  }
+  ```
+- **Respuesta de Error (400 Bad Request - intento de eliminar GENERAL):**
+  ```json
+  {
+    "message": "La categoría 'General' (ID 1) es obligatoria y no puede ser eliminada",
+    "timestamp": "2026-06-25T10:15:00.123456",
+    "status": 400
+  }
+  ```
+- **Respuesta de Error (404 Not Found):**
+  ```json
+  {
+    "message": "Categoría no encontrada con ID: 999",
+    "timestamp": "2026-06-25T10:15:00.123456",
+    "status": 404
+  }
+  ```
+
+---
+
 ### Endpoints de Clientes
 
 Los endpoints para gestionar clientes están bajo el path `/clientes`.
 
-#### 7. Obtener todos los clientes
+#### 12. Obtener todos los clientes
 
 - **Método:** `GET`
 - **URL:** `/clientes`
@@ -267,7 +401,7 @@ Los endpoints para gestionar clientes están bajo el path `/clientes`.
   ]
   ```
 
-#### 8. Obtener un cliente por ID
+#### 13. Obtener un cliente por ID
 
 - **Método:** `GET`
 - **URL:** `/clientes/{id}`
@@ -293,14 +427,14 @@ Los endpoints para gestionar clientes están bajo el path `/clientes`.
   }
   ```
 
-#### 9. Obtener un cliente por DNI
+#### 14. Obtener un cliente por DNI
 
 - **Método:** `GET`
 - **URL:** `/clientes/dni/{dni}`
 - **Descripción:** Recupera un cliente específico por su DNI.
 - **Respuesta Exitosa (200 OK):** (Igual al formato por ID)
 
-#### 10. Crear un nuevo cliente
+#### 15. Crear un nuevo cliente
 
 - **Método:** `POST`
 - **URL:** `/clientes`
@@ -335,7 +469,7 @@ Los endpoints para gestionar clientes están bajo el path `/clientes`.
   }
   ```
 
-#### 11. Actualizar un cliente existente
+#### 16. Actualizar un cliente existente
 
 - **Método:** `PUT`
 - **URL:** `/clientes/{id}`
@@ -360,7 +494,7 @@ Los endpoints para gestionar clientes están bajo el path `/clientes`.
   }
   ```
 
-#### 12. Eliminar un cliente
+#### 17. Eliminar un cliente
 
 - **Método:** `DELETE`
 - **URL:** `/clientes/{id}`
@@ -380,7 +514,7 @@ Los pedidos se crean asociados a un cliente y pueden incluir varios productos. E
 
 Para probar este flujo desde el navegador, también existe una página de simulación en `src/main/resources/static/pedidos.html`.
 
-#### 13. Crear un pedido
+#### 18. Crear un pedido
 
 - **Método:** `POST`
 - **URL:** `/pedidos`
@@ -419,43 +553,43 @@ Para probar este flujo desde el navegador, también existe una página de simula
   }
   ```
 
-#### 14. Confirmar un pedido
+#### 19. Confirmar un pedido
 
 - **Método:** `POST`
 - **URL:** `/pedidos/{id}/confirmar`
 - **Descripción:** Cambia el pedido a `CONFIRMADO` y descuenta el stock de los productos incluidos.
 
-#### 15. Cancelar un pedido
+#### 20. Cancelar un pedido
 
 - **Método:** `POST`
 - **URL:** `/pedidos/{id}/cancelar`
 - **Descripción:** Cambia el pedido a `CANCELADO`. Si el pedido estaba confirmado, devuelve el stock asociado.
 
-#### 16. Obtener todos los pedidos
+#### 21. Obtener todos los pedidos
 
 - **Método:** `GET`
 - **URL:** `/pedidos`
 - **Descripción:** Devuelve todos los pedidos cargados.
 
-#### 17. Obtener un pedido por ID
+#### 22. Obtener un pedido por ID
 
 - **Método:** `GET`
 - **URL:** `/pedidos/{id}`
 - **Descripción:** Recupera el detalle completo de un pedido.
 
-#### 18. Obtener pedidos por cliente
+#### 23. Obtener pedidos por cliente
 
 - **Método:** `GET`
 - **URL:** `/pedidos/cliente/{clienteId}`
 - **Descripción:** Devuelve todos los pedidos asociados a un cliente específico.
 
-#### 19. Obtener pedidos por estado
+#### 24. Obtener pedidos por estado
 
 - **Método:** `GET`
 - **URL:** `/pedidos/estado/{estado}`
 - **Descripción:** Filtra pedidos por estado. Valores válidos: `BORRADOR`, `CONFIRMADO`, `CANCELADO`.
 
-#### 20. Obtener pedidos por rango de fechas
+#### 25. Obtener pedidos por rango de fechas
 
 - **Método:** `GET`
 - **URL:** `/pedidos/rango?desde=2026-06-01T00:00:00&hasta=2026-06-30T23:59:59`
