@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iniciar sesión - Punto de Venta</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .login-card {
+            width: 100%;
+            max-width: 420px;
+            background: white;
+            border-radius: 16px;
+            padding: 36px 32px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
+        }
+
+        .brand {
+            text-align: center;
+            margin-bottom: 28px;
+        }
+
+        .brand h1 {
+            font-size: 1.9rem;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .brand p {
+            color: #666;
+            font-size: 0.95rem;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 6px;
+            color: #333;
+            font-weight: 600;
+            font-size: 0.92rem;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px 14px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15);
+        }
+
+        button[type="submit"] {
+            width: 100%;
+            margin-top: 8px;
+            padding: 13px;
+            border: none;
+            border-radius: 8px;
+            background: #667eea;
+            color: white;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.15s;
+        }
+
+        button[type="submit"]:hover:not(:disabled) {
+            background: #764ba2;
+        }
+
+        button[type="submit"]:disabled {
+            opacity: 0.7;
+            cursor: wait;
+        }
+
+        .message {
+            display: none;
+            margin-bottom: 16px;
+            padding: 12px 14px;
+            border-radius: 8px;
+            font-size: 0.92rem;
+        }
+
+        .message.show {
+            display: block;
+        }
+
+        .message.error {
+            background: #fde8e8;
+            color: #9b1c1c;
+            border: 1px solid #f5c6cb;
+        }
+
+        .message.info {
+            background: #e8f4fd;
+            color: #1e429f;
+            border: 1px solid #b6d4fe;
+        }
+
+        .hint {
+            margin-top: 22px;
+            padding-top: 18px;
+            border-top: 1px solid #eee;
+            color: #777;
+            font-size: 0.85rem;
+            line-height: 1.5;
+            text-align: center;
+        }
+
+        .links {
+            margin-top: 16px;
+            text-align: center;
+            font-size: 0.9rem;
+        }
+
+        .links a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .links a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-card">
+        <div class="brand">
+            <h1>Punto de Venta</h1>
+            <p>Ingresá con tu usuario del sistema</p>
+        </div>
+
+        <div id="message" class="message"></div>
+
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="username">Usuario</label>
+                <input type="text" id="username" name="username" autocomplete="username" required placeholder="admin">
+            </div>
+
+            <div class="form-group">
+                <label for="password">Contraseña</label>
+                <input type="password" id="password" name="password" autocomplete="current-password" required placeholder="••••••••">
+            </div>
+
+            <button type="submit" id="submitBtn">Iniciar sesión</button>
+        </form>
+
+        <div class="links">
+            <a href="#" id="toggleModeBtn">¿No tienes cuenta? Crea una</a>
+            <br><br>
+            <a href="index.html">Productos y categorías</a>
+            ·
+            <a href="pedidos.html">Pedidos</a>
+        </div>
+
+        <div class="hint">
+            Usuario inicial de desarrollo:<br>
+            <strong>admin</strong> / <strong>admin123</strong>
+        </div>
+    </div>
+
+    <script src="./config.js"></script>
+    <script src="./auth.js"></script>
+    <script>
+        const API_URL = window.APP_CONFIG?.apiUrl || 'http://localhost:8080';
+        const params = new URLSearchParams(window.location.search);
+        const redirectTo = params.get('redirect') || 'index.html';
+
+        if (params.get('expired') === '1') {
+            showMessage('Tu sesión expiró. Volvé a iniciar sesión.', 'info');
+        }
+
+        if (Auth.isLoggedIn()) {
+            window.location.href = redirectTo;
+        }
+
+        let isRegisterMode = false;
+
+        document.getElementById('toggleModeBtn').addEventListener('click', (e) => {
+            e.preventDefault();
+            isRegisterMode = !isRegisterMode;
+            clearMessage();
+            
+            const title = document.querySelector('.brand h1');
+            const subtitle = document.querySelector('.brand p');
+            const submitBtn = document.getElementById('submitBtn');
+            const toggleBtn = document.getElementById('toggleModeBtn');
+
+            if (isRegisterMode) {
+                title.textContent = 'Crear cuenta';
+                subtitle.textContent = 'Registra un nuevo usuario';
+                submitBtn.textContent = 'Registrarse';
+                toggleBtn.textContent = '¿Ya tienes cuenta? Inicia sesión';
+            } else {
+                title.textContent = 'Punto de Venta';
+                subtitle.textContent = 'Ingresá con tu usuario del sistema';
+                submitBtn.textContent = 'Iniciar sesión';
+                toggleBtn.textContent = '¿No tienes cuenta? Crea una';
+            }
+        });
+
+        document.getElementById('loginForm').addEventListener('submit', async (event) => {
+            event.preventDefault();
+            clearMessage();
+
+            const submitBtn = document.getElementById('submitBtn');
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value;
+
+            submitBtn.disabled = true;
+            submitBtn.textContent = isRegisterMode ? 'Registrando...' : 'Ingresando...';
+
+            try {
+                const endpoint = isRegisterMode ? '/auth/register' : '/auth/login';
+                const body = isRegisterMode 
+                    ? JSON.stringify({ username, password, role: 'USER' })
+                    : JSON.stringify({ username, password });
+
+                const response = await fetch(`${API_URL}${endpoint}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: body
+                });
+
+                const data = await response.json().catch(() => ({}));
+
+                if (!response.ok) {
+                    throw new Error(data.message || (isRegisterMode ? 'Error al registrar' : 'Credenciales inválidas'));
+                }
+
+                Auth.saveSession(data);
+                if (isRegisterMode) {
+                    showMessage('Cuenta creada con éxito. Iniciando sesión...', 'info');
+                    setTimeout(() => window.location.href = redirectTo, 1000);
+                } else {
+                    window.location.href = redirectTo;
+                }
+            } catch (error) {
+                showMessage(error.message || (isRegisterMode ? 'No se pudo crear la cuenta' : 'No se pudo iniciar sesión'), 'error');
+                submitBtn.disabled = false;
+                submitBtn.textContent = isRegisterMode ? 'Registrarse' : 'Iniciar sesión';
+            }
+        });
+
+        function showMessage(text, type) {
+            const element = document.getElementById('message');
+            element.textContent = text;
+            element.className = `message show ${type}`;
+        }
+
+        function clearMessage() {
+            const element = document.getElementById('message');
+            element.textContent = '';
+            element.className = 'message';
+        }
+    </script>
+</body>
+</html>

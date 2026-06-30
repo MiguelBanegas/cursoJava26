@@ -1,7 +1,10 @@
 package com.punto_venta.punto_venta;
 
 import com.punto_venta.model.Categoria;
+import com.punto_venta.model.Role;
+import com.punto_venta.model.User;
 import com.punto_venta.repository.CategoriaRepository;
+import com.punto_venta.repository.UserRepository;
 import org.slf4j.Logger; // Importa la clase Logger de SLF4J para registrar mensajes de log en la aplicación
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
@@ -10,6 +13,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean; // Importa la anotación Bean para definir un bean de Spring que se ejecutará al iniciar la aplicación
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import com.punto_venta.repository.ProductRepository;
 
@@ -25,7 +29,11 @@ public class PuntoVentaApplication {
 	}
 
 	@Bean // Define un bean de Spring que se ejecutará al iniciar la aplicación. En este caso, es un CommandLineRunner que se utiliza para verificar la conexión a la base de datos y contar el número de productos almacenados.
-	public CommandLineRunner initDatabase(ProductRepository productRepository, CategoriaRepository categoriaRepository) {
+	public CommandLineRunner initDatabase(
+			ProductRepository productRepository,
+			CategoriaRepository categoriaRepository,
+			UserRepository userRepository,
+			PasswordEncoder passwordEncoder) {
 		return args -> {
 			log.info("-----------------------------------------");
 			log.info("Iniciando verificación de base de datos...");
@@ -37,6 +45,13 @@ public class PuntoVentaApplication {
 					Categoria general = new Categoria("GENERAL", "Categoría por defecto para productos");
 					categoriaRepository.save(general);
 					log.info("Categoría GENERAL creada automáticamente con ID 1.");
+				}
+
+				if (userRepository.count() == 0) {
+					log.info("La tabla de usuarios está vacía. Creando usuario admin inicial...");
+					User admin = new User("admin", passwordEncoder.encode("admin123"), Role.ADMIN);
+					userRepository.save(admin);
+					log.info("Usuario admin creado (username: admin).");
 				}
 
 				long productCount = productRepository.count();

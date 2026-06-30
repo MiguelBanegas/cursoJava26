@@ -40,6 +40,18 @@ public class GlobalExceptionHandler { // Clase para manejar excepciones de forma
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 
+    @ExceptionHandler(InvalidCredentialsException.class)
+    public ResponseEntity<ApiResponse> handleInvalidCredentials(InvalidCredentialsException ex) {
+        ApiResponse response = new ApiResponse(ex.getMessage(), HttpStatus.UNAUTHORIZED.value());
+        return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
+    }
+
+    @ExceptionHandler(UsernameAlreadyExistsException.class)
+    public ResponseEntity<ApiResponse> handleUsernameAlreadyExists(UsernameAlreadyExistsException ex) {
+        ApiResponse response = new ApiResponse(ex.getMessage(), HttpStatus.CONFLICT.value());
+        return new ResponseEntity<>(response, HttpStatus.CONFLICT);
+    }
+
     @ExceptionHandler(IllegalArgumentException.class) // Maneja excepciones de argumentos ilegales, como datos nulos o inválidos
     public ResponseEntity<ApiResponse> handleIllegalArgument(IllegalArgumentException ex) {
         ApiResponse response = new ApiResponse(ex.getMessage(), HttpStatus.BAD_REQUEST.value());

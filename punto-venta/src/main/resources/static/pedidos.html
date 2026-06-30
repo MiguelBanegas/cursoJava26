@@ -224,6 +224,46 @@
             .shell { padding: 16px; }
             table, thead, tbody, th, td, tr { font-size: 0.92rem; }
         }
+
+        .header-actions {
+            display: flex;
+            flex-direction: column;
+            align-items: end;
+            gap: 10px;
+        }
+
+        .header-links {
+            display: flex;
+            gap: 14px;
+            flex-wrap: wrap;
+        }
+
+        .header-links a {
+            color: var(--accent);
+            text-decoration: none;
+            font-size: 0.92rem;
+        }
+
+        .header-links a:hover { text-decoration: underline; }
+
+        .auth-bar {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: end;
+        }
+
+        .auth-user {
+            color: rgba(226, 232, 240, 0.9);
+            font-size: 0.9rem;
+        }
+
+        .auth-logout {
+            width: auto;
+            padding: 8px 12px;
+            font-size: 0.85rem;
+        }
     </style>
 </head>
 <body>
@@ -233,7 +273,14 @@
             <h1>Punto de Venta</h1>
             <div class="subtitle">Simulador de pedidos con cliente, carrito, subtotales, total y confirmación contra la API.</div>
         </div>
-        <div class="pill">API: <strong id="apiBaseLabel">/</strong></div>
+        <div class="header-actions">
+            <div class="pill">API: <strong id="apiBaseLabel">/</strong></div>
+            <div class="header-links">
+                <a href="index.html">Productos</a>
+                <a href="login.html">Login</a>
+            </div>
+            <div id="authBar" class="auth-bar"></div>
+        </div>
     </header>
 
     <div class="grid">
@@ -334,8 +381,14 @@
     </div>
 </div>
 
-<script src="/config.js"></script>
+<script src="./auth.js"></script>
+<script src="./config.js"></script>
 <script>
+    if (!Auth.requireAuth()) {
+        throw new Error('Redirigiendo al login');
+    }
+    Auth.renderUserBar('authBar');
+
     const API_BASE = window.APP_CONFIG?.apiUrl || 'http://localhost:8080';
     const state = {
         clients: [],
@@ -536,7 +589,7 @@
     }
 
     async function loadClients() {
-        const response = await fetch(`${API_BASE}/clientes`);
+        const response = await Auth.authFetch(`${API_BASE}/clientes`);
         if (!response.ok) {
             throw new Error(`No se pudieron cargar los clientes (${response.status})`);
         }
@@ -549,7 +602,7 @@
     }
 
     async function loadProducts() {
-        const response = await fetch(`${API_BASE}/products`);
+        const response = await Auth.authFetch(`${API_BASE}/products`);
         if (!response.ok) {
             throw new Error(`No se pudieron cargar los productos (${response.status})`);
         }
@@ -576,7 +629,7 @@
         }
 
         try {
-            const createResponse = await fetch(`${API_BASE}/pedidos`, {
+            const createResponse = await Auth.authFetch(`${API_BASE}/pedidos`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -591,7 +644,7 @@
             }
 
             const orderId = createData.id;
-            const confirmResponse = await fetch(`${API_BASE}/pedidos/${orderId}/confirmar`, {
+            const confirmResponse = await Auth.authFetch(`${API_BASE}/pedidos/${orderId}/confirmar`, {
                 method: 'POST'
             });
 
@@ -625,7 +678,7 @@
 
         if (state.lastOrderId) {
             try {
-                const response = await fetch(`${API_BASE}/pedidos/${state.lastOrderId}/cancelar`, {
+                const response = await Auth.authFetch(`${API_BASE}/pedidos/${state.lastOrderId}/cancelar`, {
                     method: 'POST'
                 });
                 const data = await parseResponse(response);

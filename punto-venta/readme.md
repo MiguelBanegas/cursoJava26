@@ -25,6 +25,11 @@ Esta es una API RESTful para gestionar productos, clientes y pedidos en un siste
   - Confirmación de pedidos con descuento de stock.
   - Cancelación de pedidos confirmados con restitución de stock.
   - Consulta de pedidos por ID, por cliente, por estado y por rango de fechas.
+- **Autenticación JWT**:
+  - Login con username y contraseña en `/auth/login`.
+  - Tokens JWT con roles `ADMIN` y `USER`.
+  - Registro de usuarios público en `/auth/register` (crea usuarios con rol `USER`).
+  - Endpoints protegidos por rol; el cliente de negocio (`Cliente`) permanece separado del usuario del sistema (`User`).
 - **Validación de Datos**:
   - Validación robusta en los campos de los productos y clientes utilizando `jakarta.validation`.
 - **Soft Delete**:
@@ -37,6 +42,7 @@ Esta es una API RESTful para gestionar productos, clientes y pedidos en un siste
   - Respuestas de error estandarizadas para `ProductNotFoundException`, `CategoriaNotFoundException`, `ClienteNotFoundException`, `InsufficientStockException`, `IllegalArgumentException`, errores de validación (`MethodArgumentNotValidException`), JSON malformado (`HttpMessageNotReadableException`) y otros errores inesperados.
 - **Tecnologías**:
   - Spring Boot
+  - Spring Security + JWT
   - Spring Data JPA
   - H2 Database (o cualquier otra base de datos configurada)
 
@@ -46,10 +52,110 @@ El siguiente diagrama resume las entidades principales y sus relaciones en la ba
 
 ![DER del proyecto](docs/der.png)
 
+## 🔐 Autenticación y autorización
+
+La API usa **JWT** (JSON Web Token). Excepto `/auth/login`, `/config.js`, `/auth.js`, `/login.html` y los demás archivos estáticos del frontend, todos los endpoints requieren autenticación.
+
+### Frontend web
+
+Al levantar la aplicación, abrí **`http://localhost:8080/login.html`** para iniciar sesión o **crear un nuevo usuario**. El token devuelto por la API se guarda en el almacenamiento local del navegador (`localStorage`) y las páginas `index.html` (productos/categorías) y `pedidos.html` lo envían automáticamente en cada petición a la API.
+
+Además, el frontend gestiona los errores de permisos: si un usuario con rol `USER` intenta editar o crear productos y la API lo bloquea devolviendo un error `403 Forbidden`, la aplicación intercepta esto y muestra una alerta indicando: **"No tiene permisos de edición"**.
+
+### Roles
+
+| Rol | Permisos |
+|-----|----------|
+| `USER` | Consultar productos, categorías, clientes y pedidos. Crear clientes y pedidos (incluye confirmar/cancelar). |
+| `ADMIN` | Todo lo anterior más crear/editar/eliminar productos, categorías y clientes, y gestionar stock. También puede registrar nuevos usuarios. |
+
+### Usuario inicial (desarrollo)
+
+Al iniciar con la base de datos vacía se crea automáticamente:
+
+- **Username:** `admin`
+- **Password:** `admin123`
+- **Rol:** `ADMIN`
+
+### 1. Iniciar sesión
+
+- **Método:** `POST`
+- **URL:** `/auth/login`
+- **Autenticación:** No requerida
+- **Cuerpo de la Solicitud:**
+  ```json
+  {
+    "username": "admin",
+    "password": "admin123"
+  }
+  ```
+- **Respuesta Exitosa (200 OK):**
+  ```json
+  {
+    "token": "eyJhbGciOiJIUzI1NiJ9...",
+    "username": "admin",
+    "role": "ADMIN"
+  }
+  ```
+- **Respuesta de Error (401 Unauthorized):**
+  ```json
+  {
+    "message": "Credenciales inválidas",
+    "timestamp": "2026-06-29T10:00:00.123456",
+    "status": 401
+  }
+  ```
+
+### 2. Registrar usuario (Público)
+
+- **Método:** `POST`
+- **URL:** `/auth/register`
+- **Autenticación:** No requerida (Endpoint público para permitir registro desde el frontend)
+- **Cuerpo de la Solicitud:**
+  ```json
+  {
+    "username": "cajero1",
+    "password": "cajero123",
+    "role": "USER"
+  }
+  ```
+- **Respuesta Exitosa (201 Created):** Misma estructura que el login.
+
+### Uso del token
+
+Incluir el token en todas las peticiones protegidas:
+
+```
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9...
+```
+
+### Respuestas de seguridad
+
+| Situación | Código | Mensaje típico |
+|-----------|--------|----------------|
+| Sin token o token inválido | 401 | No autenticado |
+| Token vencido | 401 | No autenticado |
+| Rol insuficiente | 403 | Acceso denegado |
+
+### Ejemplo con curl
+
+```bash
+# Login
+curl -X POST http://localhost:8080/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"username":"admin","password":"admin123"}'
+
+# Consultar productos con token
+curl http://localhost:8080/products \
+  -H "Authorization: Bearer <token>"
+```
+
 ## 📋 Endpoints
 
 A continuación, se detallan los endpoints disponibles en la API y cómo utilizarlos.
 La URL base para todos los endpoints es `http://localhost:8080`.
+
+> **Nota:** Todos los endpoints de esta sección requieren el header `Authorization: Bearer <token>`, salvo que se indique lo contrario.
 
 ### 1. Obtener todos los productos
 
@@ -603,5 +709,5 @@ Para probar este flujo desde el navegador, también existe una página de simula
    ```bash
    ./mvnw spring-boot:run
    ```
-4.  La API estará disponible en `http://localhost:8080`. Se puede probar levantando `index.html` o `pedidos.html` desde `src/main/resources/static` en el navegador. 
+4.  La API estará disponible en `http://localhost:8080`. Abrí **`http://localhost:8080/login.html`** para iniciar sesión y acceder a `index.html` (productos) o `pedidos.html` (simulador de pedidos).
   Tambien esta disponible en https://apijava26.mabcontrol.ar

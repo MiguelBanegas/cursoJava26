@@ -62,6 +62,7 @@ public class Pedido {
         updatedAt = LocalDateTime.now();
     }
 
+    @SuppressWarnings("null")
     public void recalcularTotal() {
         total = items.stream()
                 .map(PedidoItem::getSubtotal)
