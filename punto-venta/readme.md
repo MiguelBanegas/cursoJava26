@@ -1,6 +1,6 @@
 # API de Punto de Venta
 
-Esta es una API RESTful para gestionar productos, clientes y pedidos en un sistema de punto de venta. Permite realizar operaciones CRUD sobre productos (con sus categorías), clientes y pedidos, con borrado lógico para productos y clientes.
+Esta es una API RESTful para gestionar productos, clientes, pedidos y usuarios en un sistema de punto de venta. Permite realizar operaciones CRUD sobre productos (con sus categorías), clientes y pedidos, con borrado lógico para productos y clientes. Además, cuenta con gestión de usuarios (roles) y autenticación segura basada en tokens JWT.
 
 ## 🚀 Características
 
@@ -50,7 +50,7 @@ Esta es una API RESTful para gestionar productos, clientes y pedidos en un siste
 
 El siguiente diagrama resume las entidades principales y sus relaciones en la base de datos.
 
-![DER del proyecto](docs/der.png)
+> **Nota:** Puedes encontrar la imagen del diagrama de entidad-relación (DER) en la carpeta `docs` del repositorio, bajo el nombre `der.png`.
 
 ## 🔐 Autenticación y autorización
 
