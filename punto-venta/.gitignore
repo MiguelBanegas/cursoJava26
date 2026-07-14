@@ -34,6 +34,10 @@ build/
 
 target/
 
+# Variables de entorno
+**/.env
+**/.env.*
+!.env.example
 .env*
 .env.*
 *.env
