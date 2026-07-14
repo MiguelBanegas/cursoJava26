@@ -1,0 +1,5 @@
+.git
+.vscode
+.agents
+docs
+target/*.original
