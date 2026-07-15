@@ -64,7 +64,8 @@ public class SecurityConfig {
                 "http://localhost:8081",
                 "http://localhost:3000",
                 "http://127.0.0.1:5500",
-                "https://apijava26.mabcontrol.ar"
+                "https://apijava26.mabcontrol.ar",
+                "https://apijavadocker.mabcontrol.ar"
         ));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));

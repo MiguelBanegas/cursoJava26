@@ -13,11 +13,18 @@ services:
       MYSQL_USER: puntoventa
       MYSQL_PASSWORD: PuntoVenta_2026!
 
-    ports:
-      - "3307:3306"
+    #ports: solo usarlo en local o dev
+      #- "3307:3306" # puerto por defecto de mysql
 
     volumes:
       - mysql_data:/var/lib/mysql
+      
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "puntoventa", "-pPuntoVenta_2026!"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
   api:
     build: .
     container_name: api-punto-venta
@@ -25,10 +32,12 @@ services:
     restart: unless-stopped
 
     depends_on:
-      - mysql
+      mysql:  
+        condition: service_healthy
 
     ports:
-      - "8081:8081"
+      #- "8081:8081" # puerto por defecto de Spring Boot en note
+      - "8082:8081" # mapea el puerto 8081 interno al 8082 externo
 
     environment:
       SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE}
